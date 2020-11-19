@@ -148,7 +148,7 @@ private:
 
     //
     mykilobotenvironment dhtfEnvironment;
-
+    QTime m_elapsed_time;
 
     // logging variables
     bool saveImages;
@@ -159,6 +159,8 @@ private:
     QFile log_file;
     QString log_filename_prefix = "log_dhtf";
     QTextStream log_stream;
+    float log_period=2.0;
+    float last_log=0.0;
 
 //  USEFUL FOR A SECOND LOG FILE
 //    QString log_matrix_filename_prefix = "/log_matrix";

@@ -120,7 +120,7 @@ void mykilobotexperiment::smbDisconnectedFromServer()
 
 void mykilobotexperiment::gotNewMesssage(QString msg)
 {
-    qDebug() << QString("*************************************************************New message: %1").arg(msg);
+    qDebug() << QString("Received a new message from the client: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
 
     for (QTcpSocket* clientsSocket : server->getClients())
@@ -145,6 +145,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToClient(QString msg)
 {
+    qDebug() << "Sending to client the message: " << msg;
     for (QTcpSocket* clientsSocket : server->getClients())
     {
         if (server->sendToClient(clientsSocket, msg) == -1)
@@ -241,6 +242,7 @@ void mykilobotexperiment::initialise(bool isResume) {
 
     savedImagesCounter = 0;
     this->time = 0;
+    m_elapsed_time.start();
 
     // init log file operations
     // if the log checkmark is marked then save the logs
@@ -291,7 +293,7 @@ void mykilobotexperiment::stopExperiment() {
 void mykilobotexperiment::run() {
     //qDebug() << QString("in run");
 
-    this->time += 0.1; // 100 ms in sec
+    this->time=m_elapsed_time.elapsed()/1000.0; // time in seconds
 
     // stop after given time
     if(this->time >= STOP_AFTER) {
@@ -325,8 +327,10 @@ void mykilobotexperiment::run() {
         sendToClient(dhtfEnvironment.initialise_buffer);
     }
 
-    else if(dhtfEnvironment.send_buffer.startsWith("A") && std::fmod(this->time,2.0) > 2.0-0.1)// if(true)
+    //else if(dhtfEnvironment.send_buffer.startsWith("A") && std::fmod(this->time,2.0) > 2.0-0.1)// if(true)
+    else if(dhtfEnvironment.send_buffer.startsWith("A") && (qRound((time-last_log)*10.0f) >= log_period*10.0f) )// if(true)
     {
+        last_log=this->time;
         sendToClient(dhtfEnvironment.send_buffer);
         dhtfEnvironment.send_buffer.clear();
     }

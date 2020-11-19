@@ -242,16 +242,16 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     lightColour kb_colour = kilobot_entity.getLedColour();
     if(kb_colour == lightColour::RED){
         this->kilobots_colours[k_id] = Qt::red;     // kilobot in WAITING
-        qDebug() << "ReeEEEEEEEEEEEEEEEEEEEEE " << k_id;
+        //qDebug() << "ReeEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else if(kb_colour == lightColour::BLUE){
         this->kilobots_colours[k_id] = Qt::blue;    // kilobot in LEAVING
-        qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
+        //qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else
     {
         this->kilobots_colours[k_id] = Qt::black;   // random walking
-        qDebug() << "BLack****************** " << k_id;
+        //qDebug() << "BLack****************** " << k_id;
     }
 
 
@@ -325,8 +325,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             }
             else if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)LEAVING)
             {
-                if(kilobots_colours[k_id] == Qt::blue)
-                    qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
+//                if(kilobots_colours[k_id] == Qt::blue)
+//                    qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
                 if(kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)LEAVING)
                     kilobots_states_LOG[k_id] = kilobots_states[k_id];
                 kilobots_states[k_id] = (KilobotEnvironment::kilobot_arena_state)LEAVING;
@@ -357,8 +357,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     }
 
 
-    qDebug() <<QString("Kilobot %1 state is: %2").arg(k_id).arg(kilobots_states[k_id]);
-    qDebug() <<QString("Kilobot %1 LOG state is: %2").arg(k_id).arg(kilobots_states_LOG[k_id]);
+    //qDebug() <<QString("Kilobot %1 state is: %2").arg(k_id).arg(kilobots_states[k_id]);
+    //qDebug() <<QString("Kilobot %1 LOG state is: %2").arg(k_id).arg(kilobots_states_LOG[k_id]);
 
 
 
@@ -396,11 +396,10 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             if(task_type == SOFT_TASK)
                 message.data = 10; //seconds
 
-
-            qDebug() << QString("Sending message to kilobot %1").arg(k_id);
-            qDebug() << QString("Sending INSIDE");
-            qDebug() << QString("TYPE: %1").arg(message.type);
-            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
+//            qDebug() << QString("Sending message to kilobot %1").arg(k_id);
+//            qDebug() << QString("Sending INSIDE");
+//            qDebug() << QString("TYPE: %1").arg(message.type);
+//            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
 
             emit transmitKiloState(message);
         }
@@ -417,17 +416,15 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             message.type = 0;
             message.data = 0;
 
-
-            qDebug() << QString("Sending message to kilobot %1").arg(k_id);
-            qDebug() << QString("Sending OUTSIDE");
-            qDebug() << QString("TYPE: %1").arg(message.type);
-            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
+//            qDebug() << QString("Sending message to kilobot %1").arg(k_id);
+//            qDebug() << QString("Sending OUTSIDE");
+//            qDebug() << QString("TYPE: %1").arg(message.type);
+//            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
 
             emit transmitKiloState(message);
         }
-
-        else
-            qDebug() << QString("NOT need to send a message to kilobot %1").arg(k_id) << endl;
+//        else
+//            qDebug() << QString("NOT need to send a message to kilobot %1").arg(k_id) << endl;
 
     }
 
