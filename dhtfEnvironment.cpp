@@ -40,24 +40,27 @@ void mykilobotenvironment::initialiseEnvironment(QVector<int> activated_areas, Q
     double white_space = SCALING * 120.0;
     double radius = (((2.0*ARENA_CENTER - white_space)/ 4.0) - white_space)/2.0;
     // qDebug() << QString("radius") << radius;
+    QPointF areasOffset(0,1000);
 
     for (int areaID=0; areaID<16; ++areaID){
         if(std::find(activated_areas.begin(),activated_areas.end(), areaID) != activated_areas.end())
         {
+            QPointF areaPos((1.0+2.0*(areaID%4))*radius + (1.0+(areaID%4))*white_space, (1.0 + floor(areaID/4)*2.0 )*radius + (1.0 + floor(areaID/4))*white_space);
+            areaPos += areasOffset;
             if(std::find(hard_tasks.begin(),hard_tasks.end(), areaID) != hard_tasks.end())
             {
                 if(std::find(hard_tasks_client.begin(),hard_tasks_client.end(), areaID) != hard_tasks_client.end())
-                    areas.push_back(new Area(0, HARD_TASK, HARD_TASK, QPointF((1.0+2*areaID%4)*radius + (1.0+areaID%4)*white_space, (1.0 + floor(areaID/4)*2 )*radius + (1.0 + floor(areaID/4))*white_space), radius));
+                    areas.push_back(new Area(areaID, HARD_TASK, HARD_TASK, areaPos, radius));
                 else
-                    areas.push_back(new Area(0, HARD_TASK, SOFT_TASK, QPointF((1.0+2*areaID%4)*radius + (1.0+areaID%4)*white_space, (1.0 + floor(areaID/4)*2 )*radius + (1.0 + floor(areaID/4))*white_space), radius));
+                    areas.push_back(new Area(areaID, HARD_TASK, SOFT_TASK, areaPos, radius));
             }
 
             else
             {
                 if(std::find(hard_tasks_client.begin(),hard_tasks_client.end(), areaID) != hard_tasks_client.end())
-                    areas.push_back(new Area(0, SOFT_TASK, HARD_TASK, QPointF((1.0+2*areaID%4)*radius + (1.0+areaID%4)*white_space, (1.0 + floor(areaID/4)*2 )*radius + (1.0 + floor(areaID/4))*white_space), radius));
+                    areas.push_back(new Area(areaID, SOFT_TASK, HARD_TASK, areaPos, radius));
                 else
-                    areas.push_back(new Area(0, SOFT_TASK, SOFT_TASK, QPointF((1.0+2*areaID%4)*radius + (1.0+areaID%4)*white_space, (1.0 + floor(areaID/4)*2 )*radius + (1.0 + floor(areaID/4))*white_space), radius));
+                    areas.push_back(new Area(areaID, SOFT_TASK, SOFT_TASK, areaPos, radius));
             }
 
         }
