@@ -120,7 +120,7 @@ void mykilobotexperiment::smbDisconnectedFromServer()
 
 void mykilobotexperiment::gotNewMesssage(QString msg)
 {
-    qDebug() << QString("New message: %1").arg(msg);
+    qDebug() << QString("*************************************************************New message: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
 
     for (QTcpSocket* clientsSocket : server->getClients())

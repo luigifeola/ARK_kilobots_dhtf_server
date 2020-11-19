@@ -538,7 +538,9 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
     // ready areas from client side
     QVector<int> ready(areas.size(),0);
-    if(receive_buffer.size() != 0){
+
+
+    if(receive_buffer.startsWith("T")){
         receive_buffer.remove(0,1); // remove the "T"
         for(int i=0; i<receive_buffer.size(); i++){
             ready[i] = QString(receive_buffer[i]).toInt();
