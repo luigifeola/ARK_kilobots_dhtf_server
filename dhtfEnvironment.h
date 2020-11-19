@@ -57,6 +57,8 @@ public:
     float minTimeBetweenTwoMsg; // minimum time between two messages
     double time;
     bool saveLOG;
+    bool initialised_client;
+    QString initialise_buffer;
     QString send_buffer;
     QString receive_buffer;
 // signals and slots are used by qt to signal state changes to objects

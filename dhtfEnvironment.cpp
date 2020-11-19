@@ -26,6 +26,8 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
 
     this->saveLOG = false;
 
+    this->initialised_client = false;
+    this->initialise_buffer = "";
     this->send_buffer = "";
     this->receive_buffer= "";
     // define environment:
@@ -464,12 +466,12 @@ void mykilobotenvironment::reset(){
     QVector<int> server_task (activated_areas.size(), 0);
     QVector<int> client_task (activated_areas.size(), 0);
 
-    send_buffer = "I";
+    initialise_buffer = "I";
 
     for(int i=0; i<activated_areas.size(); i++)
     {
         int char_id = 97+activated_areas[i];    // 97 is a in ASCII table
-        send_buffer.append(QChar(char_id));
+        initialise_buffer.append(QChar(char_id));
 
         if(std::find(hard_tasks.begin(),hard_tasks.end(), activated_areas[i]) != hard_tasks.end())
             server_task[i] = 1;
@@ -484,11 +486,11 @@ void mykilobotenvironment::reset(){
 
     for(uint s_task : server_task)
     {
-        send_buffer.append(QString::number(s_task));
+        initialise_buffer.append(QString::number(s_task));
     }
     for(uint c_task : client_task)
     {
-        send_buffer.append(QString::number(c_task));
+        initialise_buffer.append(QString::number(c_task));
     }
 
 

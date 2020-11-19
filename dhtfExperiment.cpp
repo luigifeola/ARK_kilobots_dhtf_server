@@ -134,15 +134,20 @@ void mykilobotexperiment::gotNewMesssage(QString msg)
 
 void mykilobotexperiment::on_pushButton_send_clicked()
 {
-    QString message_to_send;
-    if(bufferLineEdit->text().size()== 0)
-        message_to_send = dhtfEnvironment.send_buffer;
-    else
-        message_to_send = bufferLineEdit->text();
-
     for (QTcpSocket* clientsSocket : server->getClients())
     {
-        if (server->sendToClient(clientsSocket, message_to_send) == -1)
+        if (server->sendToClient(clientsSocket, bufferLineEdit->text()) == -1)
+        {
+            qDebug() << "Some error occured";
+        }
+    }
+}
+
+void mykilobotexperiment::sendToClient(QString msg)
+{
+    for (QTcpSocket* clientsSocket : server->getClients())
+    {
+        if (server->sendToClient(clientsSocket, msg) == -1)
         {
             qDebug() << "Some error occured";
         }
@@ -312,20 +317,17 @@ void mykilobotexperiment::run() {
 //    else
 //        qDebug()<< "std::fmod = " << std::fmod(this->time,2.0);
 
-    if(dhtfEnvironment.send_buffer.startsWith("A") && std::fmod(this->time,5.0) > 5.0-0.1)// if(true)
+    if(dhtfEnvironment.receive_buffer.startsWith("R")){
+        dhtfEnvironment.initialised_client = true;
+    }
+    else if(dhtfEnvironment.initialised_client == false || dhtfEnvironment.receive_buffer.startsWith("M"))
     {
-        for (QTcpSocket* clientsSocket : server->getClients())
-        {
-            if (server->sendToClient(clientsSocket, dhtfEnvironment.send_buffer) == -1)
-            {
-                qDebug() << "Some error occured";
-            }
-            else
-            {
-                qDebug() << "SENDING: " << dhtfEnvironment.send_buffer;
-            }
-        }
+        sendToClient(dhtfEnvironment.initialise_buffer);
+    }
 
+    else if(dhtfEnvironment.send_buffer.startsWith("A") && std::fmod(this->time,2.0) > 2.0-0.1)// if(true)
+    {
+        sendToClient(dhtfEnvironment.send_buffer);
         dhtfEnvironment.send_buffer.clear();
     }
 

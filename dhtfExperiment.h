@@ -143,6 +143,7 @@ private:
 
     //
     void setupEnvironments();
+    void sendToClient(QString msg);
     void plotEnvironment();
 
     //
