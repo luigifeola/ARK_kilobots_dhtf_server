@@ -220,11 +220,14 @@ void mykilobotenvironment::reset(){
 // Only update if environment is dynamic:
 void mykilobotenvironment::update() {
     //eventualmente sarà qui che gestirai il completamento delle aree
-//    send_buffer = "A";
-//    for(Area* a : areas)
-//    {
-//        send_buffer.append(QString::number(1));
-//    }
+    send_buffer = "A";
+    for(Area* a : areas) {
+        if (a->completed){
+            send_buffer.append(QString::number(1));
+        } else {
+            send_buffer.append(QString::number(0));
+        }
+    }
 }
 
 
