@@ -57,17 +57,19 @@ public:
     KiloLog(kilobot_id id, QPointF position, double orientation, kilobot_colour colour) :
         id(id), position(position), orientation(orientation), colour(colour) {}
 
-    kilobot_id id;          // unique kilobot id
-    QPointF position;       // kilobot position on the plane
-    double orientation;     // kilobot orientation
-    kilobot_colour colour;  // kilobot led colour
+    kilobot_id id;                                  // unique kilobot id
+    QPointF position;                               // kilobot position on the plane
+    double orientation;                             // kilobot orientation
+    kilobot_colour colour;                          // kilobot led colour
+    KilobotEnvironment::kilobot_arena_state state;  //kilobot state (i.e. INSIDE, OUTSIDE, LEAVING)
 
     /** Update all log values */
-    void updateAllValues(kilobot_id id, QPointF position, double orientation, kilobot_colour colour) {
+    void updateAllValues(kilobot_id id, QPointF position, double orientation, kilobot_colour colour, KilobotEnvironment::kilobot_arena_state state) {
         this->id = id;
         this->position = position;
         this->orientation = orientation;
         this->colour = colour;
+        this->state = state;
     }
 
     /** Set position */
@@ -98,6 +100,8 @@ public:
     virtual ~mykilobotexperiment() {delete server;}
 
     QWidget *createGUI();
+
+    
     QLineEdit* bufferLineEdit = new QLineEdit;
 
 // signals and slots are used by qt to signal state changes to objects
@@ -156,11 +160,13 @@ private:
 //    QString data_filename_prefix="/home/salah/pheromoneSI/exp%1";
 //    QString im_filename_suffix="/phero_%1.jpg";
     bool logExp;
-    QFile log_file;
+    QFile log_file_areas;
     QString log_filename_prefix = "log_dhtf";
+    QTextStream log_stream_areas;
+    QFile log_file;
+    QFile log_file1;
     QTextStream log_stream;
-    float log_period=2.0;
-    float last_log=0.0;
+    QTextStream log_stream1;
 
 //  USEFUL FOR A SECOND LOG FILE
 //    QString log_matrix_filename_prefix = "/log_matrix";

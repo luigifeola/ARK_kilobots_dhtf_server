@@ -43,7 +43,7 @@ public:
     double creation_time; /* Time at which the area is created/respawned */
     double completed_time; /* Time at which the area is completed */
 
-    double waiting_timer; /* Timer for which kilobots stay on area before leaving*/
+    int waiting_timer; /* Timer for which kilobots stay on area before leaving*/
 
     /* constructor */
     Area() : id(-1), type(0), position(QPointF(0,0)), radius(0) {}
@@ -68,14 +68,15 @@ public:
         }
 
         if (type == HARD_TASK && other_type == HARD_TASK)
-            this->waiting_timer = 60.0;
+            this->waiting_timer = 60;
 
         else if( (type == SOFT_TASK && other_type == HARD_TASK) ||
                  (type == HARD_TASK && other_type == SOFT_TASK) )
-            this->waiting_timer = 40.0;
+            this->waiting_timer = 40;
 
         else
-            this->waiting_timer = 30.0;
+            this->waiting_timer = 30;
+            
     }
 
 

@@ -25,8 +25,8 @@
 #include <QDir>
 
 #define STOP_AFTER 3600
-#define SAVE_IMAGE_EVERY 5
 #define SAVE_LOG_EVERY 5
+#define SEND_ARK_MSG_EVERY 2
 
 // return pointer to interface!
 // mykilobotexperiment can and should be completely hidden from the application
@@ -247,20 +247,21 @@ void mykilobotexperiment::initialise(bool isResume) {
     // init log file operations
     // if the log checkmark is marked then save the logs
     if(logExp) {
+        /********************************LOG EXPERIMENT***************************************************************************/
         // open file
-        if(log_file.isOpen()) {
+        if(log_file_areas.isOpen()) {
             // if it was open close and re-open again later
             // this erase the old content
-            log_file.close();
+            log_file_areas.close();
         }
         // log filename consist of the prefix and current date and time
-        QString log_filename = log_filename_prefix + "_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
-        log_file.setFileName(log_filename);
+        QString log_filename = log_filename_prefix + "_completedAreas_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_file_areas.setFileName(log_filename);
         // open the file
-        if(log_file.open(QIODevice::WriteOnly)) {
-            qDebug() << "Log file " << log_file.fileName() << " opened";
-            log_stream.setDevice(&log_file);
-            log_stream
+        if(log_file_areas.open(QIODevice::WriteOnly)) {
+            qDebug() << "Log file " << log_file_areas.fileName() << " opened";
+            log_stream_areas.setDevice(&log_file_areas);
+            log_stream_areas
                     << "time" << '\t'
                     << "id" << '\t'
                     << "creation" << '\t'
@@ -268,6 +269,86 @@ void mykilobotexperiment::initialise(bool isResume) {
                     <<"type" << '\t'
                     <<"kilo_on_top" << '\n';
         } else {
+            qDebug() << "ERROR opening file "<< log_filename;
+        }
+
+
+        /********************************LOG FOR VIDEO***************************************************************************/
+        // open file
+        if(log_file.isOpen()) {
+            // if it was open close and re-open again later
+            // this erase the old content
+            log_file.close();
+        }
+        // log filename consist of the prefix and current date and time
+        log_filename = log_filename_prefix + "_kilopos_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_file.setFileName(log_filename);
+        // open the file
+        if(log_file.open(QIODevice::WriteOnly)) {
+            qDebug() << "Log file " << log_file.fileName() << " opened";
+            log_stream.setDevice(&log_file);
+            log_stream
+                    << "time" << '\t'
+                    << "kID" << '\t'
+                    << "colour" << '\t'
+                    << "positionX" << '\t'
+                    << "positionY" << '\t'
+                    << "orientation" << '\t'
+                    << "state" << '\n';
+            //Initial state
+
+            for(int i=0; i<kilobots.size();i++)
+            {
+                log_stream
+                        << this->time << '\t'
+                        << kilobots[i].id << '\t'
+                        << kilobots[i].colour << '\t'
+                        << kilobots[i].position.x() << '\t'
+                        << kilobots[i].position.y() << '\t'
+                        << kilobots[i].orientation <<'\t'
+                        << kilobots[i].state << '\n';
+            }
+        }
+        else {
+            qDebug() << "ERROR opening file "<< log_filename;
+        }
+
+
+        // open file
+        if(log_file1.isOpen()) {
+            // if it was open close and re-open again later
+            // this erase the old content
+            log_file1.close();
+        }
+        // log filename consist of the prefix and current date and time
+        log_filename = log_filename_prefix + "_areapos_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_file1.setFileName(log_filename);
+        // open the file
+        if(log_file1.open(QIODevice::WriteOnly)) {
+            qDebug() << "Log file " << log_file1.fileName() << " opened";
+            log_stream1.setDevice(&log_file1);
+            log_stream1
+                    << "time" << '\t'
+                    << "id" << '\t'
+                    << "positionX" << '\t'
+                    << "positionY" << '\t'
+                    << "colour" << '\t'
+                    << "state" << '\n';
+            //Initial state
+
+            for(Area* a : dhtfEnvironment.areas)
+            {
+                log_stream1
+                        << this->time << '\t'
+                        << a->id << '\t'
+                        << a->position.x() << '\t'
+                        << a->position.y() << '\t'
+                        << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
+                        << (a->completed == true ? 1:0) << '\n';
+
+            }
+        }
+        else {
             qDebug() << "ERROR opening file "<< log_filename;
         }
     }
@@ -284,8 +365,10 @@ void mykilobotexperiment::initialise(bool isResume) {
 void mykilobotexperiment::stopExperiment() {
 
     //Close Log file
+    if (log_file_areas.isOpen()){
+        log_file_areas.close();
+    }
     if (log_file.isOpen()){
-//        qDebug() << "Closing LOG file " << log_file.fileName();
         log_file.close();
     }
 }
@@ -328,9 +411,8 @@ void mykilobotexperiment::run() {
     }
 
     //else if(dhtfEnvironment.send_buffer.startsWith("A") && std::fmod(this->time,2.0) > 2.0-0.1)// if(true)
-    else if(dhtfEnvironment.send_buffer.startsWith("A") && (qRound((time-last_log)*10.0f) >= log_period*10.0f) )// if(true)
+    else if(dhtfEnvironment.send_buffer.startsWith("A") && (qRound(this->time*10)%SEND_ARK_MSG_EVERY == 0))
     {
-        last_log=this->time;
         sendToClient(dhtfEnvironment.send_buffer);
         dhtfEnvironment.send_buffer.clear();
     }
@@ -359,28 +441,59 @@ void mykilobotexperiment::run() {
     }
 
 
-    // save image
-    if(qRound(this->time*10)%SAVE_IMAGE_EVERY == 0) {
+    // save LOG files and images for videos
+    if(qRound(this->time*10)%SAVE_LOG_EVERY == 0) {
         if(saveImages) {
-//            qDebug() << "Saving Image";
+            // qDebug() << "Saving Image";
             emit saveImage(QString("./images/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+        }
+        if(logExp){
+            for(int i=0; i<kilobots.size();i++)
+            {
+                log_stream
+                        << this->time << '\t'
+                        << kilobots[i].id << '\t'
+                        << kilobots[i].colour << '\t'
+                        << kilobots[i].position.x() << '\t'
+                        << kilobots[i].position.y() << '\t'
+                        << kilobots[i].orientation << '\n';
+            }
+
+            for(Area* a : dhtfEnvironment.areas)
+            {
+                log_stream1
+                        << this->time << '\t'
+                        << a->id << '\t'
+                        << a->position.x() << '\t'
+                        << a->position.y() << '\t'
+                        << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
+                        << (a->completed == true ? 1:0) << '\n';
+
+            }
+
         }
     }
 
-    // save log
-    if(logExp && dhtfEnvironment.saveLOG) {
-        dhtfEnvironment.saveLOG = false;
-        qDebug() << "LOG: saving at " << this->time*10;
+
+    // save log for areas
+    if(logExp) {
+        if(dhtfEnvironment.saveLOG)
+        {
+            dhtfEnvironment.saveLOG = false;
+            qDebug() << "LOG_EXP: saving at " << this->time*10;
 
 
-        log_stream << this->time << '\t'
-                   << dhtfEnvironment.completed_area->id << '\t'
-                   // << dhtfEnvironment.completed_area.completed_time - dhtfEnvironment.completed_area.creation_time << '\t'
-                   << dhtfEnvironment.completed_area->creation_time << '\t'
-                   << dhtfEnvironment.completed_area->completed_time << '\t'
-                   << int(dhtfEnvironment.completed_area->type) << '\t'
-                   << dhtfEnvironment.completed_area->kilobots_in_area.size() << '\t'
-                   << endl;
+            log_stream_areas
+                       << this->time << '\t'
+                       << dhtfEnvironment.completed_area->id << '\t'
+                       << dhtfEnvironment.completed_area->creation_time << '\t'
+                       << dhtfEnvironment.completed_area->completed_time << '\t'
+                       << int(dhtfEnvironment.completed_area->type) << '\t'
+                       << dhtfEnvironment.completed_area->kilobots_in_area.size() << '\t'
+                       << endl;
+        }
+
+
     }
 }
 
@@ -390,7 +503,6 @@ void mykilobotexperiment::run() {
 void mykilobotexperiment::setupInitialKilobotState(Kilobot kilobot_entity) {
 //    qDebug() << QString("in setup init kilobot state");
 
-// WARNING : PROGRAM CRASHES HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // assign all kilobot to environment DHTF
     this->setCurrentKilobotEnvironment(&dhtfEnvironment);
     kilobot_id k_id = kilobot_entity.getID();
@@ -422,7 +534,7 @@ void mykilobotexperiment::setupInitialKilobotState(Kilobot kilobot_entity) {
     dhtfEnvironment.lastSent[k_id] = dhtfEnvironment.minTimeBetweenTwoMsg;
 
     // TODO initialize kilobots location correctly
-    dhtfEnvironment.kilobots_positions[k_id] = kilobot_entity.getPosition() * SCALING;
+    dhtfEnvironment.kilobots_positions[k_id] = kilobot_entity.getPosition();
     dhtfEnvironment.kilobots_states[k_id] = (KilobotEnvironment::kilobot_arena_state)0; //WARNING : why 0 and not directly RANDOM_WALK??
     dhtfEnvironment.kilobots_states_LOG[k_id] = (KilobotEnvironment::kilobot_arena_state)0;
     dhtfEnvironment.kilobots_colours[k_id] = Qt::black;
@@ -449,7 +561,8 @@ void mykilobotexperiment::updateKilobotState(Kilobot kilobotCopy) {
         kilobot_colour k_colour = kilobotCopy.getLedColour();
         QPointF k_position = kilobotCopy.getPosition();
         double k_rotation = qRadiansToDegrees(qAtan2(-kilobotCopy.getVelocity().y(), kilobotCopy.getVelocity().x()));
-        kilobots[k_id].updateAllValues(k_id, k_position, k_rotation, k_colour);
+        KilobotEnvironment::kilobot_arena_state k_state = dhtfEnvironment.kilobots_states[k_id];
+        kilobots[k_id].updateAllValues(k_id, k_position, k_rotation, k_colour, k_state);
     }
 }
 
@@ -478,14 +591,34 @@ QColor mykilobotexperiment::GetFloorColor(int track_x, int track_y) {
 
 // Plot Environment on frame:
 void mykilobotexperiment::plotEnvironment() {
-//    qDebug() << QString("In plot environment");
+    //    qDebug() << QString("In plot environment");
     // clean image
     clearDrawingsOnRecordedImage();
 
     // center, radius, color, thikness, text, dunno
-//    drawCircle(QPointF(100,100), 5, QColor(Qt::red), 3, "try", true);
-//    drawCircle(QPointF(750,750), 735, QColor(Qt::yellow), 25, "center", true);
+    // drawCircle(QPointF(1000,1000), (ARENA_SIZE*SCALING/2) - 100, QColor(Qt::red), 2, "try", false);
+    // drawCircle(QPointF(750,750), 735, QColor(Qt::yellow), 25, "center", true);
 
+    // arena scaled
+    std::vector<cv::Point> pos0 {Point(500,500), Point(500,1500)};
+    drawLine(pos0,Qt::blue, 5,"",false);
+    std::vector<cv::Point> pos1 {Point(500,500), Point(1500,500)};
+    drawLine(pos1,Qt::blue, 5,"",false);
+    std::vector<cv::Point> pos2 {Point(500,1500), Point(1500,1500)};
+    drawLine(pos2,Qt::blue, 5,"",false);
+    std::vector<cv::Point> pos3 {Point(1500,500), Point(1500,1500)};
+    drawLine(pos3,Qt::blue, 5,"",false);
+
+
+    // arena - 120 pixels ~= 2*Kilo_diameter
+     std::vector<cv::Point> bd0 {Point(500+120,500+120), Point(500+120,1500-120)};
+     drawLine(bd0,Qt::yellow, 3,"",false);
+     std::vector<cv::Point> bd1 {Point(500+120,500+120), Point(1500-120,500+120)};
+     drawLine(bd1,Qt::yellow, 3,"",false);
+     std::vector<cv::Point> bd2 {Point(500+120,1500-120), Point(1500-120,1500-120)};
+     drawLine(bd2,Qt::yellow, 3,"",false);
+     std::vector<cv::Point> bd3 {Point(1500-120,500+120), Point(1500-120,1500-120)};
+     drawLine(bd3,Qt::yellow, 3,"",false);
 
     for(const Area* a : dhtfEnvironment.areas)
     {
@@ -514,7 +647,7 @@ void mykilobotexperiment::plotEnvironment() {
 
 
    for(uint k_id : this->kilobots_ids) {
-       drawCircleOnRecordedImage(dhtfEnvironment.kilobots_positions.at(k_id) / SCALING, 5, dhtfEnvironment.kilobots_colours.at(k_id), 5, "");
+       drawCircleOnRecordedImage(kilobots[k_id].position, 5, kilobots[k_id].colour, 5, "");
    }
 }
 

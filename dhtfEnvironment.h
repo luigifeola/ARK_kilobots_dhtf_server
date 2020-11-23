@@ -26,11 +26,14 @@
 #include "area.h"
 
 #define SCALING 0.5
-#define ARENA_CENTER SCALING*1000
-#define ARENA_SIZE SCALING*746
-#define KILO_DIAMETER SCALING*33.0
+// #define SHIFTX 0 //sheffield
+#define SHIFTX 500 //cnr
+#define SHIFTY 500
+#define ARENA_CENTER 1000
+#define ARENA_SIZE 2000
+#define KILO_DIAMETER 33.0
 #define ACTIVE_AREAS 8
-#define HARD_TASKS_NUMBER 1
+#define HARD_TASKS_NUMBER 4
 
 class mykilobotenvironment : public KilobotEnvironment
 {
@@ -43,10 +46,10 @@ public:
     QVector<kilobot_arena_state> kilobots_states_LOG;
     QVector<QPointF> kilobots_positions;    // list of all kilobots positions
     QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate
-                                       // the state of the kilobot
+
 
     QVector<Area*> areas;   // list of all areas present in the experiment
-    Area* completed_area = new Area(1000, 0, 0, QPointF(1000.0,1000.0),200.0); // valori a membro di segugio
+    Area* completed_area = new Area(1000, 0, 0, QPointF(1000.0,1000.0),200.0); // random values
 
     QVector<float> lastSent;    // when the last message was sent to the kb at given position
 
