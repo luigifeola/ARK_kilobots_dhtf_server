@@ -600,24 +600,25 @@ void mykilobotexperiment::plotEnvironment() {
     // drawCircle(QPointF(750,750), 735, QColor(Qt::yellow), 25, "center", true);
 
     // arena scaled
-    std::vector<cv::Point> pos0 {Point(500,500), Point(500,1500)};
+    std::vector<cv::Point> pos0 {Point(SHIFTX,SHIFTY), Point(SHIFTX,1000+SHIFTY)};
     drawLine(pos0,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos1 {Point(500,500), Point(1500,500)};
+    std::vector<cv::Point> pos1 {Point(SHIFTX,SHIFTY), Point(1000+SHIFTX,SHIFTY)};
     drawLine(pos1,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos2 {Point(500,1500), Point(1500,1500)};
+    std::vector<cv::Point> pos2 {Point(SHIFTX,1000+SHIFTY), Point(1000+SHIFTX,1000+SHIFTY)};
     drawLine(pos2,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos3 {Point(1500,500), Point(1500,1500)};
+    std::vector<cv::Point> pos3 {Point(1000+SHIFTX,SHIFTY), Point(1000+SHIFTX,1000+SHIFTY)};
     drawLine(pos3,Qt::blue, 5,"",false);
 
 
     // arena - 120 pixels ~= 2*Kilo_diameter
-     std::vector<cv::Point> bd0 {Point(500+120,500+120), Point(500+120,1500-120)};
+    // this visualisation might not be the same used for computation... TODO: refactor
+     std::vector<cv::Point> bd0 {Point(SHIFTX+70,SHIFTY+70), Point(SHIFTX+70,SHIFTY+1000-70)};
      drawLine(bd0,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd1 {Point(500+120,500+120), Point(1500-120,500+120)};
+     std::vector<cv::Point> bd1 {Point(SHIFTX+70,SHIFTY+70), Point(SHIFTX+1000-70,SHIFTY+70)};
      drawLine(bd1,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd2 {Point(500+120,1500-120), Point(1500-120,1500-120)};
+     std::vector<cv::Point> bd2 {Point(SHIFTX+70,SHIFTY+1000-70), Point(SHIFTX+1000-70,SHIFTY+1000-70)};
      drawLine(bd2,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd3 {Point(1500-120,500+120), Point(1500-120,1500-120)};
+     std::vector<cv::Point> bd3 {Point(SHIFTX+1000-70,SHIFTY+70), Point(SHIFTX+1000-70,SHIFTY+1000-70)};
      drawLine(bd3,Qt::yellow, 3,"",false);
 
     for(const Area* a : dhtfEnvironment.areas)

@@ -219,13 +219,15 @@ void mykilobotenvironment::reset(){
 // Only update if environment is dynamic:
 void mykilobotenvironment::update() {
     //eventualmente sarà qui che gestirai il completamento delle aree
-//    send_buffer = "A";
-//    for(Area* a : areas)
-//    {
-//        send_buffer.append(QString::number(1));
-//    }
+    send_buffer = "A";
+    for(int i = 0; i < areas.size(); i++)
+    {
+        if(areas[i]->completed)
+            send_buffer.append(QString::number(1));
+        else
+            send_buffer.append(QString::number(0));
+    }
 }
-
 
 
 // generate virtual sensors reading and send it to the kbs (same as for ARGOS)
@@ -394,7 +396,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         int distance_from_centre_x = this->kilobots_positions[k_id].x()-center.x();
         int distance_from_centre_y = this->kilobots_positions[k_id].y()-center.y();
         // if(distance_from_centre > (ARENA_SIZE*SCALING/2) - 100/*2*KILO_DIAMETER*/) {    // 100 = 10 cm
-        int threshold = 120;
+        int threshold = 70;
 
 
         // RANDOM WALK ------------> INSIDE_AREA
