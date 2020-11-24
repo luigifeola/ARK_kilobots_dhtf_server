@@ -165,13 +165,13 @@ QWidget *mykilobotexperiment::createGUI() {
 
     // add check box for saving the images
     QCheckBox *saveImages_ckb = new QCheckBox("Record experiment");
-    saveImages_ckb->setChecked(false);  // start as not checked
+    saveImages_ckb->setChecked(true);  // start as not checked
     lay->addWidget(saveImages_ckb);
     toggleSaveImages(saveImages_ckb->isChecked());
 
     // add check box for logging the experiment
     QCheckBox *logExp_ckb = new QCheckBox("Log experiment");
-    logExp_ckb->setChecked(false);   // start as not checked
+    logExp_ckb->setChecked(true);   // start as not checked
     lay->addWidget(logExp_ckb);
     toggleLogExp(logExp_ckb->isChecked());
 
