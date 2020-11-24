@@ -600,55 +600,62 @@ void mykilobotexperiment::plotEnvironment() {
     // drawCircle(QPointF(750,750), 735, QColor(Qt::yellow), 25, "center", true);
 
     // arena scaled
-    std::vector<cv::Point> pos0 {Point(500,500), Point(500,1500)};
+    std::vector<cv::Point> pos0 {Point(SHIFTX,SHIFTY), Point(SHIFTX,1000+SHIFTY)};
     drawLine(pos0,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos1 {Point(500,500), Point(1500,500)};
+    std::vector<cv::Point> pos1 {Point(SHIFTX,SHIFTY), Point(1000+SHIFTX,SHIFTY)};
     drawLine(pos1,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos2 {Point(500,1500), Point(1500,1500)};
+    std::vector<cv::Point> pos2 {Point(SHIFTX,1000+SHIFTY), Point(1000+SHIFTX,1000+SHIFTY)};
     drawLine(pos2,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos3 {Point(1500,500), Point(1500,1500)};
+    std::vector<cv::Point> pos3 {Point(1000+SHIFTX,SHIFTY), Point(1000+SHIFTX,1000+SHIFTY)};
     drawLine(pos3,Qt::blue, 5,"",false);
 
 
     // arena - 120 pixels ~= 2*Kilo_diameter
-     std::vector<cv::Point> bd0 {Point(500+120,500+120), Point(500+120,1500-120)};
+    // this visualisation might not be the same used for computation... TODO: refactor
+     std::vector<cv::Point> bd0 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY)};
      drawLine(bd0,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd1 {Point(500+120,500+120), Point(1500-120,500+120)};
+     std::vector<cv::Point> bd1 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY,SHIFTY+2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+2*KILO_DIAMETER,SHIFTY)};
      drawLine(bd1,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd2 {Point(500+120,1500-120), Point(1500-120,1500-120)};
+     std::vector<cv::Point> bd2 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY)};
      drawLine(bd2,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd3 {Point(1500-120,500+120), Point(1500-120,1500-120)};
+     std::vector<cv::Point> bd3 {Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY)};
      drawLine(bd3,Qt::yellow, 3,"",false);
 
-    for(const Area* a : dhtfEnvironment.areas)
-    {
+     // Draw some useful position : center + 4 corners
+     // drawCircle(QPoint(ARENA_CENTER,ARENA_CENTER), 30.0, QColor(Qt::black), 15, "", false);
 
-        if(!a->completed)
-            drawCircle(a->position, a->radius, a->color, 3, std::to_string(a->id), false);
-        else
-            drawCircle(a->position, a->radius, Qt::transparent, 3, std::to_string(a->id), false);
-
-        // Draw some useful position : center + 4 corners
-        // drawCircle(QPoint(ARENA_CENTER,ARENA_CENTER), 30.0, QColor(Qt::black), 15, "", false);
-
-        // drawCircle(QPoint(0,0), 30.0, QColor(Qt::yellow), 15, "", false);
-        // drawCircle(QPoint(0,2.0*ARENA_CENTER), 30.0, QColor(Qt::yellow), 15, "", false);
-        // drawCircle(QPoint(2.0*ARENA_CENTER,0), 30.0, QColor(Qt::yellow), 15, "", false);
-        // drawCircle(QPoint(2.0*ARENA_CENTER,2.0*ARENA_CENTER), 30.0, QColor(Qt::yellow), 15, "", false);
-
-        if(this->saveImages)
-        {
-            if(!a->completed)
-                drawCircleOnRecordedImage(a->position, a->radius, a->color, 10, std::to_string(a->id));
-            else
-                drawCircleOnRecordedImage(a->position, a->radius, Qt::transparent, 10, std::to_string(a->id));
-        }
-    }
+     // drawCircle(QPoint(0,0), 30.0, QColor(Qt::yellow), 15, "", false);
+     // drawCircle(QPoint(0,2.0*ARENA_CENTER), 30.0, QColor(Qt::yellow), 15, "", false);
+     // drawCircle(QPoint(2.0*ARENA_CENTER,0), 30.0, QColor(Qt::yellow), 15, "", false);
+     // drawCircle(QPoint(2.0*ARENA_CENTER,2.0*ARENA_CENTER), 30.0, QColor(Qt::yellow), 15, "", false);
 
 
-   for(uint k_id : this->kilobots_ids) {
-       drawCircleOnRecordedImage(kilobots[k_id].position, 5, kilobots[k_id].colour, 5, "");
-   }
+
+     for(const Area* a : dhtfEnvironment.areas)
+     {
+
+         if(!a->completed)
+             drawCircle(a->position, a->radius, a->color, 3, std::to_string(a->id), false);
+         else
+             drawCircle(a->position, a->radius, Qt::transparent, 3, std::to_string(a->id), false);
+
+
+
+         // Draw circles on recorded images
+         // if(this->saveImages)
+         // {
+         //     if(!a->completed)
+         //         drawCircleOnRecordedImage(a->position, a->radius, a->color, 10, std::to_string(a->id));
+         //     else
+         //         drawCircleOnRecordedImage(a->position, a->radius, Qt::transparent, 10, std::to_string(a->id));
+         // }
+     }
+
+
+     // Draw led on kilobots
+     // for(uint k_id : this->kilobots_ids) {
+     //     drawCircleOnRecordedImage(kilobots[k_id].position, 5, kilobots[k_id].colour, 5, "");
+     // }
 }
 
 
