@@ -10,12 +10,6 @@ class KilobotEnvironment : public QObject
     Q_OBJECT
 public:
 
-    typedef enum {
-        RANDOM_WALK=0,
-        INSIDE_AREA=1,
-        LEAVING=2,
-    }kilobot_arena_state;
-
     explicit KilobotEnvironment(QObject *) {}
     KilobotEnvironment() {}
 //    virtual QVector <uint8_t> getEnvironmentValue(QPointF) { QVector <uint8_t> temp; return temp;} // Don't need?

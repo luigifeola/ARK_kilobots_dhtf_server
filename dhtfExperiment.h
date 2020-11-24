@@ -61,10 +61,10 @@ public:
     QPointF position;                               // kilobot position on the plane
     double orientation;                             // kilobot orientation
     kilobot_colour colour;                          // kilobot led colour
-    KilobotEnvironment::kilobot_arena_state state;  //kilobot state (i.e. INSIDE, OUTSIDE, LEAVING)
+    kilobot_state state;  //kilobot state (i.e. INSIDE, OUTSIDE, LEAVING)
 
     /** Update all log values */
-    void updateAllValues(kilobot_id id, QPointF position, double orientation, kilobot_colour colour, KilobotEnvironment::kilobot_arena_state state) {
+    void updateAllValues(kilobot_id id, QPointF position, double orientation, kilobot_colour colour, kilobot_state state) {
         this->id = id;
         this->position = position;
         this->orientation = orientation;

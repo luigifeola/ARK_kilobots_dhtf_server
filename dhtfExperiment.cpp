@@ -287,27 +287,27 @@ void mykilobotexperiment::initialise(bool isResume) {
         if(log_file.open(QIODevice::WriteOnly)) {
             qDebug() << "Log file " << log_file.fileName() << " opened";
             log_stream.setDevice(&log_file);
-            log_stream
-                    << "time" << '\t'
-                    << "kID" << '\t'
-                    << "colour" << '\t'
-                    << "positionX" << '\t'
-                    << "positionY" << '\t'
-                    << "orientation" << '\t'
-                    << "state" << '\n';
+//            log_stream
+//                    << "time" << '\t'
+//                    << "kID" << '\t'
+//                    << "colour" << '\t'
+//                    << "positionX" << '\t'
+//                    << "positionY" << '\t'
+//                    << "orientation" << '\t'
+//                    << "state" << '\n';
             //Initial state
-
-            for(int i=0; i<kilobots.size();i++)
-            {
-                log_stream
-                        << this->time << '\t'
-                        << kilobots[i].id << '\t'
-                        << kilobots[i].colour << '\t'
-                        << kilobots[i].position.x() << '\t'
-                        << kilobots[i].position.y() << '\t'
-                        << kilobots[i].orientation <<'\t'
-                        << kilobots[i].state << '\n';
+           log_stream << this->time;
+           for(int i=0; i<kilobots.size();i++){
+                log_stream << "\t"
+                           << kilobots[i].id << '\t'
+                           << kilobots[i].colour << '\t'
+                           << kilobots[i].position.x() << '\t'
+                           << kilobots[i].position.y() << '\t'
+                           << kilobots[i].orientation <<'\t'
+                           << kilobots[i].state;
             }
+            log_stream << endl;
+
         }
         else {
             qDebug() << "ERROR opening file "<< log_filename;
@@ -448,16 +448,17 @@ void mykilobotexperiment::run() {
             emit saveImage(QString("./images/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
         }
         if(logExp){
-            for(int i=0; i<kilobots.size();i++)
-            {
-                log_stream
-                        << this->time << '\t'
-                        << kilobots[i].id << '\t'
-                        << kilobots[i].colour << '\t'
-                        << kilobots[i].position.x() << '\t'
-                        << kilobots[i].position.y() << '\t'
-                        << kilobots[i].orientation << '\n';
-            }
+            log_stream << this->time;
+            for(int i=0; i<kilobots.size();i++){
+                 log_stream << "\t"
+                            << kilobots[i].id << '\t'
+                            << kilobots[i].colour << '\t'
+                            << kilobots[i].position.x() << '\t'
+                            << kilobots[i].position.y() << '\t'
+                            << kilobots[i].orientation <<'\t'
+                            << kilobots[i].state;
+             }
+             log_stream << endl;
 
             for(Area* a : dhtfEnvironment.areas)
             {
@@ -535,12 +536,14 @@ void mykilobotexperiment::setupInitialKilobotState(Kilobot kilobot_entity) {
 
     // TODO initialize kilobots location correctly
     dhtfEnvironment.kilobots_positions[k_id] = kilobot_entity.getPosition();
-    dhtfEnvironment.kilobots_states[k_id] = (KilobotEnvironment::kilobot_arena_state)0; //WARNING : why 0 and not directly RANDOM_WALK??
-    dhtfEnvironment.kilobots_states_LOG[k_id] = (KilobotEnvironment::kilobot_arena_state)0;
+    dhtfEnvironment.kilobots_states[k_id] = RANDOM_WALK;
+    dhtfEnvironment.kilobots_states_LOG[k_id] = RANDOM_WALK;
     dhtfEnvironment.kilobots_colours[k_id] = Qt::black;
 
     KiloLog kLog(k_id, kilobot_entity.getPosition(), 0, kilobot_entity.getLedColour());
+    kLog.state=RANDOM_WALK;
     kilobots[k_id] = kLog;
+    qDebug() << "ORIENTATION IS " << kilobots[k_id].orientation;
     if(!kilobots_ids.contains(k_id))
         kilobots_ids.append(k_id);
 
@@ -561,7 +564,7 @@ void mykilobotexperiment::updateKilobotState(Kilobot kilobotCopy) {
         kilobot_colour k_colour = kilobotCopy.getLedColour();
         QPointF k_position = kilobotCopy.getPosition();
         double k_rotation = qRadiansToDegrees(qAtan2(-kilobotCopy.getVelocity().y(), kilobotCopy.getVelocity().x()));
-        KilobotEnvironment::kilobot_arena_state k_state = dhtfEnvironment.kilobots_states[k_id];
+        kilobot_state k_state = dhtfEnvironment.kilobots_states[k_id];
         kilobots[k_id].updateAllValues(k_id, k_position, k_rotation, k_colour, k_state);
     }
 }

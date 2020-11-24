@@ -124,14 +124,12 @@ void mykilobotenvironment::reset(){
     }
     std::sort(activated_areas.begin(), activated_areas.end());
 
-    // Show selected areas
-    qDebug() << QString("Selected areas");
-    //Print selected areas
-    for(int act_ar : activated_areas)
-    {
-        qDebug() << act_ar;
+    // Print selected areas
+    QDebug dbg(QtDebugMsg); // plotting on one line even with the loop
+    dbg << "Selected areas: ";
+    for(int act_ar : activated_areas) {
+        dbg << act_ar << ", ";
     }
-
 
     while(hard_tasks.size()<HARD_TASKS_NUMBER)
     {
@@ -148,7 +146,6 @@ void mykilobotenvironment::reset(){
 
     // Show selected hard tasts for server
     qDebug() << QString("Selected hard tasks server");
-    //Print selected areas
     for(uint h_task : hard_tasks)
     {
         qDebug() << h_task;
@@ -171,7 +168,6 @@ void mykilobotenvironment::reset(){
 
     // Show selected hard tasts for client
     qDebug() << QString("Selected hard tasks client");
-    //Print selected areas
     for(uint h_task : hard_tasks_client)
     {
         qDebug() << h_task;
@@ -300,22 +296,22 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         if(areas[i]->isInside(kilobot_entity.getPosition()))
         {
             // inside small radius (radius - kilodiameter)
-            if(areas[i]->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING) && kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)RANDOM_WALK)
+            if(areas[i]->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING) && kilobots_states[k_id] == RANDOM_WALK)
             {
                 if(std::find(areas[i]->kilobots_in_area.begin(),areas[i]->kilobots_in_area.end(), k_id) == areas[i]->kilobots_in_area.end())
                     areas[i]->kilobots_in_area.push_back(k_id);
                 kilobots_states_LOG[k_id] = kilobots_states[k_id];
-                kilobots_states[k_id] = (KilobotEnvironment::kilobot_arena_state)INSIDE_AREA;
+                kilobots_states[k_id] = INSIDE_AREA;
 
                 timer_to_send = areas[i]->waiting_timer / 10;
                 found = true;
                 break;
             }
 
-            if( (kilobots_colours[k_id] == Qt::black || kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)RANDOM_WALK) ||
-                ((kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)INSIDE_AREA) && kilobots_colours[k_id] != Qt::blue)  )
+            if( (kilobots_colours[k_id] == Qt::black || kilobots_states[k_id] == RANDOM_WALK) ||
+                ((kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == INSIDE_AREA) && kilobots_colours[k_id] != Qt::blue)  )
             {
-                if(kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)INSIDE_AREA && kilobots_colours[k_id] == Qt::red)
+                if(kilobots_states[k_id] == INSIDE_AREA && kilobots_colours[k_id] == Qt::red)
                 {
                     kilobots_states_LOG[k_id] = kilobots_states[k_id];
                 }
@@ -326,13 +322,13 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 found = true;
                 break;
             }
-            else if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)LEAVING)
+            else if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == LEAVING)
             {
 //                if(kilobots_colours[k_id] == Qt::blue)
 //                    qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
-                if(kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)LEAVING)
+                if(kilobots_states[k_id] == LEAVING)
                     kilobots_states_LOG[k_id] = kilobots_states[k_id];
-                kilobots_states[k_id] = (KilobotEnvironment::kilobot_arena_state)LEAVING;
+                kilobots_states[k_id] = LEAVING;
                 areas[i]->kilobots_in_area.erase(std::remove(areas[i]->kilobots_in_area.begin(), areas[i]->kilobots_in_area.end(), k_id),
                                           areas[i]->kilobots_in_area.end());
 
@@ -353,10 +349,10 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
     if(!found)
     {
-        if(kilobots_states[k_id] == (KilobotEnvironment::kilobot_arena_state)RANDOM_WALK)
+        if(kilobots_states[k_id] == RANDOM_WALK)
             kilobots_states_LOG[k_id] = kilobots_states[k_id];
         kilobots_states_LOG[k_id] = kilobots_states[k_id];
-        kilobots_states[k_id] = (KilobotEnvironment::kilobot_arena_state)RANDOM_WALK;
+        kilobots_states[k_id] = RANDOM_WALK;
     }
 
 

@@ -37,6 +37,12 @@
 #define ACTIVE_AREAS 16
 #define HARD_TASKS_NUMBER 1
 
+typedef enum {
+    RANDOM_WALK=0,
+    INSIDE_AREA=1,
+    LEAVING=2,
+}kilobot_state;
+
 class mykilobotenvironment : public KilobotEnvironment
 {
     Q_OBJECT
@@ -44,8 +50,8 @@ public:
     explicit mykilobotenvironment(QObject *parent = 0);
     void reset();
 
-    QVector<kilobot_arena_state> kilobots_states; // list of all kilobots locations meaning 0 for outside areas, 1 for inside
-    QVector<kilobot_arena_state> kilobots_states_LOG;
+    QVector<kilobot_state> kilobots_states; // list of all kilobots locations meaning 0 for outside areas, 1 for inside
+    QVector<kilobot_state> kilobots_states_LOG;
     QVector<QPointF> kilobots_positions;    // list of all kilobots positions
     QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate
 
