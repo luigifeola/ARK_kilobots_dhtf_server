@@ -280,6 +280,16 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
             if(this->time == this->completed_area->completed_time)
             {
+                qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area;
+                for(uint k : this->completed_area->kilobots_in_area)
+                {
+                    kilobot_message party_message;
+                    party_message.id = k;
+                    party_message.type = PARTY;
+                    party_message.data = 0;
+                    qDebug() << "Party for kID: " << k << "type: "<< party_message.type;
+                    emit transmitKiloState(party_message);
+                }
 
                 this->saveLOG = true;
             }

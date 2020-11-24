@@ -49,8 +49,8 @@ mykilobotexperiment::mykilobotexperiment() {
 
 
     client = new ClientStuff("127.0.0.1", 7001); //local
-//    client = new ClientStuff("143.167.48.37", 7001); //sheffield
-//    setStatus(client->getStatus());
+    // client = new ClientStuff("143.167.48.37", 7001); //sheffield
+    //    setStatus(client->getStatus());
     connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
     connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(gotError(QAbstractSocket::SocketError)));
@@ -208,7 +208,7 @@ void mykilobotexperiment::initialise(bool isResume) {
             log_file_areas.close();
         }
         // log filename consist of the prefix and current date and time
-        QString log_filename = log_filename_prefix + "_completedAreas_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        QString log_filename = log_filename_prefix + "_completedAreas_client_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
         log_file_areas.setFileName(log_filename);
         // open the file
         if(log_file_areas.open(QIODevice::WriteOnly)) {

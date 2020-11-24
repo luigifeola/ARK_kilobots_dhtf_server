@@ -21,6 +21,7 @@ typedef enum {  // Enum for the robot states
     RANDOM_WALKING = 0,
     WAITING = 1,
     LEAVING = 2,
+    PARTY = 3,
 } action_t;
 
 typedef enum {  // Enum for the robot position wrt to areas
@@ -74,6 +75,8 @@ const int TIMEOUT_CONST = 1;
 const uint32_t to_sec = 32;
 uint32_t last_waiting_ticks = 0;
 
+uint32_t party_ticks = 0;
+
 /*-------------------------------------------------------------------*/
 /* Function for setting the motor speed                              */
 /*-------------------------------------------------------------------*/
@@ -121,13 +124,17 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
             sa_payload = ((msg->data[1]&0b11)  << 8) | (msg->data[2]);
 
             
-            if(sa_type != 2)
+            if(sa_type == 0 || sa_type == 1)
             {
               location = sa_type;
               if(location == INSIDE && internal_timeout == 0)
               {
                 internal_timeout = sa_payload * TIMEOUT_CONST * 10;
               }
+            }
+            else if(sa_type == 3){
+              current_state = PARTY;
+              party_ticks = kilo_ticks;
             }
             else if (rotation_to_center == 0 && internal_timeout == 0)
             {
@@ -146,13 +153,17 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
             sa_type = msg->data[4] >> 2 & 0x0F;
             sa_payload = ((msg->data[4]&0b11)  << 8) | (msg->data[5]);
 
-            if(sa_type != 2)
+            if(sa_type == 0 || sa_type == 1)
             {
               location = sa_type;
               if(location == INSIDE && internal_timeout == 0)
               {
                 internal_timeout = sa_payload * TIMEOUT_CONST * 10;
               }
+            }
+            else if(sa_type == 3){
+              current_state = PARTY;
+              party_ticks = kilo_ticks;
             }
             else if (rotation_to_center == 0 && internal_timeout == 0)
             {
@@ -171,13 +182,17 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
             sa_type = msg->data[7] >> 2 & 0x0F;
             sa_payload = ((msg->data[7]&0b11)  << 8) | (msg->data[8]);
 
-            if(sa_type != 2)
+            if(sa_type == 0 || sa_type == 1)
             {
               location = sa_type;
               if(location == INSIDE && internal_timeout == 0)
               {
                 internal_timeout = sa_payload * TIMEOUT_CONST * 10;
               }
+            }
+            else if(sa_type == 3){
+              current_state = PARTY;
+              party_ticks = kilo_ticks;
             }
             else if (rotation_to_center == 0 && internal_timeout == 0)
             {
@@ -362,6 +377,19 @@ void finite_state_machine(){
             }
             break;
         }
+        case PARTY : {
+          set_motion(TURN_LEFT);
+          set_color(RGB(0,3,0));
+          delay(500);
+          set_color(RGB(3,3,3));
+          if(kilo_ticks > party_ticks + 10 * to_sec)
+          {
+            set_motion(FORWARD);
+            set_color(RGB(0,0,0));
+            current_state = RANDOM_WALKING;
+          }
+          break;  
+        }
     }
 }
 
@@ -378,7 +406,7 @@ void loop() {
         }
 
         random_walk();
-        finite_state_machine();
+        finite_state_machine();        
 }
 
 int main() {

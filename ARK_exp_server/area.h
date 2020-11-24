@@ -58,12 +58,12 @@ public:
 
         if(type == HARD_TASK)
         {
-            this->respawn_timer = 50.0;
+            this->respawn_timer = 50;
             this->color = Qt::red;
         }
         else
         {
-            this->respawn_timer = 30.0;
+            this->respawn_timer = 30;
             this->color = Qt::blue;
         }
 

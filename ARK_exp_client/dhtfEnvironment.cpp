@@ -136,7 +136,8 @@ void mykilobotenvironment::update() {
             {
                 if(completed[i] == 1)
                 {
-                     areas[i]->set_completed();
+                     areas[i]->set_completed(this->completed_area);
+                     this->saveLOG = true;
                 }
                 else
                 {
@@ -206,7 +207,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         if(a->isInside(kilobot_entity.getPosition()))
         {
             // inside small radius (radius - kilodiameter)
-            if(a->isInside(kilobot_entity.getPosition(), KILO_DIAMETER) && kilobots_states[k_id] == RANDOM_WALK)
+            if(a->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING / 2) && kilobots_states[k_id] == RANDOM_WALK)
             {
                 if(std::find(a->kilobots_in_area.begin(),a->kilobots_in_area.end(), k_id) == a->kilobots_in_area.end())
                     a->kilobots_in_area.push_back(k_id);

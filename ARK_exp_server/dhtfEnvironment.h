@@ -41,6 +41,7 @@ typedef enum {
     RANDOM_WALK=0,
     INSIDE_AREA=1,
     LEAVING=2,
+    PARTY=3,
 }kilobot_state;
 
 class mykilobotenvironment : public KilobotEnvironment

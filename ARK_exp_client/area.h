@@ -114,8 +114,9 @@ public:
         return this->completed;
     }
 
-    void set_completed()
+    void set_completed(Area* a_copy)
     {
+        *a_copy = *this;
         this->completed = true;
         this->kilobots_in_area.clear();
     }
