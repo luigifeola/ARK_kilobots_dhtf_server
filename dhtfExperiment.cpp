@@ -371,6 +371,9 @@ void mykilobotexperiment::stopExperiment() {
     if (log_file.isOpen()){
         log_file.close();
     }
+    if (log_file1.isOpen()){
+        log_file1.close();
+    }
 }
 
 void mykilobotexperiment::run() {
@@ -388,7 +391,6 @@ void mykilobotexperiment::run() {
 
     // Update Environment
     dhtfEnvironment.time = (float)time;
-    dhtfEnvironment.ongoingRuntimeIdentification = this->runtimeIdentificationLock;
 
 
     //here you should send a message

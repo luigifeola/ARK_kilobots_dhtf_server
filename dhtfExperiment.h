@@ -157,8 +157,6 @@ private:
     // logging variables
     bool saveImages;
     int savedImagesCounter;
-//    QString data_filename_prefix="/home/salah/pheromoneSI/exp%1";
-//    QString im_filename_suffix="/phero_%1.jpg";
     bool logExp;
     QFile log_file_areas;
     QString log_filename_prefix = "log_dhtf";
@@ -168,10 +166,6 @@ private:
     QTextStream log_stream;
     QTextStream log_stream1;
 
-//  USEFUL FOR A SECOND LOG FILE
-//    QString log_matrix_filename_prefix = "/log_matrix";
-//    QTextStream log_matrix_stream;
-//    QFile log_matrix_file;
 
 
     bool server_experiment; //True for server False for client

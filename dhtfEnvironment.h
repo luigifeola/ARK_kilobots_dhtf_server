@@ -26,15 +26,15 @@
 #include "area.h"
 
 #define SCALING 0.5
-#define SHIFTX 0 //sheffield
-#define SHIFTY 1000 //sheffield
-//#define SHIFTX 500 //cnr
-//#define SHIFTY 500
+// #define SHIFTX 0 //sheffield
+// #define SHIFTY 1000 //sheffield
+#define SHIFTX 500 //cnr
+#define SHIFTY 500
 #define ARENA_CENTER 1000
 #define ARENA_SIZE 2000
-//#define KILO_DIAMETER 66 //cnr
-#define KILO_DIAMETER 33 //sheffield
-#define ACTIVE_AREAS 16
+#define KILO_DIAMETER 66 //cnr
+// #define KILO_DIAMETER 33 //sheffield
+#define ACTIVE_AREAS 5
 #define HARD_TASKS_NUMBER 1
 
 typedef enum {
@@ -53,8 +53,7 @@ public:
     QVector<kilobot_state> kilobots_states; // list of all kilobots locations meaning 0 for outside areas, 1 for inside
     QVector<kilobot_state> kilobots_states_LOG;
     QVector<QPointF> kilobots_positions;    // list of all kilobots positions
-    QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate
-
+    QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate the state of the kilobot
 
     QVector<Area*> areas;   // list of all areas present in the experiment
     Area* completed_area = new Area(1000, 0, 0, QPointF(1000.0,1000.0),200.0); // random values
@@ -63,7 +62,6 @@ public:
 
 
     int ArenaX, ArenaY;
-    bool ongoingRuntimeIdentification;
 
     float minTimeBetweenTwoMsg; // minimum time between two messages
     double time;
