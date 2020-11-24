@@ -610,16 +610,15 @@ void mykilobotexperiment::plotEnvironment() {
     drawLine(pos3,Qt::blue, 5,"",false);
 
 
-    // arena - 120 pixels ~= 2*Kilo_diameter
-    // this visualisation might not be the same used for computation... TODO: refactor
-     std::vector<cv::Point> bd0 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY)};
-     drawLine(bd0,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd1 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY,SHIFTY+2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+2*KILO_DIAMETER,SHIFTY)};
-     drawLine(bd1,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd2 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY)};
-     drawLine(bd2,Qt::yellow, 3,"",false);
-     std::vector<cv::Point> bd3 {Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+2*KILO_DIAMETER,SHIFTY), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY,SHIFTY+1000-2*KILO_DIAMETER,SHIFTY)};
-     drawLine(bd3,Qt::yellow, 3,"",false);
+    // arena - 2*Kilo_diameter
+    std::vector<cv::Point> bd0 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER)};
+    drawLine(bd0,Qt::yellow, 3,"",false);
+    std::vector<cv::Point> bd1 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER)};
+    drawLine(bd1,Qt::yellow, 3,"",false);
+    std::vector<cv::Point> bd2 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER)};
+    drawLine(bd2,Qt::yellow, 3,"",false);
+    std::vector<cv::Point> bd3 {Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER)};
+    drawLine(bd3,Qt::yellow, 3,"",false);
 
      // Draw some useful position : center + 4 corners
      // drawCircle(QPoint(ARENA_CENTER,ARENA_CENTER), 30.0, QColor(Qt::black), 15, "", false);
