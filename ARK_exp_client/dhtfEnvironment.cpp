@@ -146,6 +146,7 @@ void mykilobotenvironment::update() {
                          party_message.type = PARTY;
                          party_message.data = 0;
                          // qDebug() << "Party for kID: " << k << "type: "<< party_message.type;
+                         lastSent[k] = this->time;
                          emit transmitKiloState(party_message);
                      }
 
@@ -322,7 +323,6 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         if( ((kilobots_states_LOG[k_id] == RANDOM_WALK && kilobots_states[k_id] == INSIDE_AREA) ||
              (kilobots_colours[k_id] == Qt::black && kilobots_states[k_id] == INSIDE_AREA)) )
         {
-            lastSent[k_id] = this->time;
             // create and fill the message
 
             message.id = k_id;
@@ -336,6 +336,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 //            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
 
             // qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
+            lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }
 
@@ -343,7 +344,6 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         // LEAVING ----------------> RANDOM WALK
         else if((kilobots_states_LOG[k_id] != RANDOM_WALK && kilobots_states[k_id] == RANDOM_WALK) /*|| (kilobots_colours[k_id] != Qt::black && kilobots_states[k_id] == RANDOM_WALK))*/ )
         {
-            lastSent[k_id] = this->time;
 
             message.id = k_id;
             message.type = 0;
@@ -355,6 +355,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 //            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
 
             // qDebug() << "ARK EXP MESSAGE to " << k_id << " OUTSIDE, type " << message.type << "time:"<<this->time;
+            lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }
 
@@ -390,6 +391,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 message.type = 2;   // sending colliding to the kilobot
                 message.data = turning_in_msg;
                 // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
+
+                lastSent[k_id] = this->time;
                 emit transmitKiloState(message);
             }
         }

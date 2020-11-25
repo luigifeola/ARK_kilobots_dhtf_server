@@ -58,7 +58,7 @@ mykilobotexperiment::mykilobotexperiment() {
 
 void mykilobotexperiment::receivedSomething(QString msg)
 {
-    qDebug() << QString("**************************New message: %1").arg(msg);
+    // qDebug() << QString("**************************New message: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
 }
 
@@ -407,7 +407,7 @@ void mykilobotexperiment::run() {
     if(qRound(this->time*10)%SAVE_LOG_EVERY == 0) {
         if(saveImages) {
             // qDebug() << "Saving Image";
-            emit saveImage(QString("./images/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+            emit saveImage(QString("./images_client/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
         }
         if(logExp){
             log_stream << this->time;
