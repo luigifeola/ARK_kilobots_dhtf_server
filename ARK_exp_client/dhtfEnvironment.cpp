@@ -68,7 +68,7 @@ void mykilobotenvironment::initialiseAreas()
     for (int areaID=0; areaID<16; areaID++){
         if(std::find(activated_areas.begin(),activated_areas.end(), areaID) != activated_areas.end())
         {
-            qDebug() << "areaID" << areaID;
+            // qDebug() << "areaID" << areaID;
             QPointF areaPos((1.0+2.0*(areaID%4))*radius + (1.0+(areaID%4))*white_space, (1.0 + floor(areaID/4)*2.0 )*radius + (1.0 + floor(areaID/4))*white_space);
             areaPos += areasOffset;
             if(client_task[0] == "1")
@@ -127,7 +127,7 @@ void mykilobotenvironment::update() {
 
     else if(receive_buffer.startsWith("A"))
     {
-        qDebug() << "RECEIVED:" << receive_buffer;
+        // qDebug() << "RECEIVED:" << receive_buffer;
         receive_buffer.remove(0,1);
         QVector<int> completed(areas.size(),0);
         for(int i=0; i<receive_buffer.size(); i++){
@@ -137,6 +137,18 @@ void mykilobotenvironment::update() {
                 if(completed[i] == 1)
                 {
                      areas[i]->set_completed(this->completed_area);
+
+                     qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
+                     for(uint k : this->completed_area->kilobots_in_area)
+                     {
+                         kilobot_message party_message;
+                         party_message.id = k;
+                         party_message.type = PARTY;
+                         party_message.data = 0;
+                         // qDebug() << "Party for kID: " << k << "type: "<< party_message.type;
+                         emit transmitKiloState(party_message);
+                     }
+
                      this->saveLOG = true;
                 }
                 else
@@ -323,7 +335,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 //            qDebug() << QString("TYPE: %1").arg(message.type);
 //            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
 
-            qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
+            // qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
             emit transmitKiloState(message);
         }
 
@@ -342,7 +354,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 //            qDebug() << QString("TYPE: %1").arg(message.type);
 //            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
 
-            qDebug() << "ARK EXP MESSAGE to " << k_id << " OUTSIDE, type " << message.type << "time:"<<this->time;
+            // qDebug() << "ARK EXP MESSAGE to " << k_id << " OUTSIDE, type " << message.type << "time:"<<this->time;
             emit transmitKiloState(message);
         }
 
@@ -377,7 +389,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 message.id = k_id;
                 message.type = 2;   // sending colliding to the kilobot
                 message.data = turning_in_msg;
-                qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
+                // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
                 emit transmitKiloState(message);
             }
         }
