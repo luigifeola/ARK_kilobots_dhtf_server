@@ -121,8 +121,6 @@ public slots:
         logExp = toggle;
     }
 
-    void toggleServerExp(bool toggle) {server_experiment = toggle; }
-
     QColor GetFloorColor(int x, int y);
 
     /*************************************************************************************************/
@@ -163,9 +161,14 @@ private:
     QTextStream log_stream;
     QTextStream log_stream1;
 
+    float log_period = 1.0;
+    float last_log = 0.0;
 
+    float ARK_message_period = 2.0;
+    float last_ARK_message = 0.0;
 
-    bool server_experiment; //True for server False for client
+    float env_update_period = 2.0;
+    float last_env_update = 0.0;
 
     //kilo objects
     QVector < kilobot_id >  kilobots_ids;

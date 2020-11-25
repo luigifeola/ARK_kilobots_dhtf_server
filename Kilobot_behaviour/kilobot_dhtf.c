@@ -67,7 +67,6 @@ int sa_payload = 0;
 uint8_t start = 0;   // waiting from ARK a start signal to run the experiment 0 : not received, 1 : received, 2 : not need anymore to receive
 int location=0;
 int internal_timeout=0;                         //Internal counter for task complention wait
-int leaving_timer;                              //Internal counter for the action of leaving a task when timeout expires
 int turn_timer;                                //Avoid the robot to get stuck in Leagving
 
 /* PARAMETER: change this value to determine timeout length */
@@ -136,7 +135,7 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
               current_state = PARTY;
               party_ticks = kilo_ticks;
             }
-            else if (rotation_to_center == 0 && internal_timeout == 0)
+            else if (sa_type == 2 && rotation_to_center == 0 && internal_timeout == 0)  //if you are not yet rotating to the center and you are not INSIDE 
             {
               // get rotation toward the center (if far from center)
               // avoid colliding with the wall
@@ -165,10 +164,8 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
               current_state = PARTY;
               party_ticks = kilo_ticks;
             }
-            else if (rotation_to_center == 0 && internal_timeout == 0)
+            else if (sa_type == 2 && rotation_to_center == 0 && internal_timeout == 0)
             {
-              // get rotation toward the center (if far from center)
-              // avoid colliding with the wall
               uint8_t rotation_slice = sa_payload;
               if(rotation_slice == 3) {
                 rotation_to_center = -M_PI/3;
@@ -194,10 +191,8 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
               current_state = PARTY;
               party_ticks = kilo_ticks;
             }
-            else if (rotation_to_center == 0 && internal_timeout == 0)
+            else if (sa_type == 2 && rotation_to_center == 0 && internal_timeout == 0)
             {
-              // get rotation toward the center (if far from center)
-              // avoid colliding with the wall
               uint8_t rotation_slice = sa_payload;
               if(rotation_slice == 3) {
                 rotation_to_center = -M_PI/3;
@@ -342,7 +337,6 @@ void finite_state_machine(){
             /* Timeout condition */
             if(kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
             {
-                leaving_timer = 150;
 		            internal_timeout = 0;
 
                 set_motion(FORWARD);
@@ -353,27 +347,9 @@ void finite_state_machine(){
             break;
         }
         case LEAVING : {
-            // set_color(RGB(0,0,3));
-            if (leaving_timer>0){
-                leaving_timer--;
-            }
-            else{
-                if(location == OUTSIDE){
-                    current_state = RANDOM_WALKING;
-                    set_color(RGB(0,0,0));
-                }
-                // else{
-                //     turn_timer = 5;
-                //     current_state = ROTATION;
-                //     set_motion (TURN_LEFT);
-                //     /*set_motion(TURN_LEFT);
-                //     leaving_timer=50;
-                //     break_timer--;
-                //     if (break_timer == 0){
-                //         current_state = RANDOM_WALKING;
-                //         set_motion(FORWARD);  
-                //     }*/
-                // }
+            if(location == OUTSIDE){
+                current_state = RANDOM_WALKING;
+                set_color(RGB(0,0,0));
             }
             break;
         }

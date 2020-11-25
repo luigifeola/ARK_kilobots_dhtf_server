@@ -114,8 +114,9 @@ public:
         return this->completed;
     }
 
-    void set_completed(Area* a_copy)
+    void set_completed(double kTime, Area* a_copy)
     {
+        this->completed_time = kTime;
         *a_copy = *this;
         this->completed = true;
         this->kilobots_in_area.clear();
@@ -136,10 +137,12 @@ public:
             return false;
     }
 
-    void Respawn()
+    void received_Respawn(double kTime)
     {
         this->completed = false;
         this->kilobots_in_area.clear();
+        this->creation_time = kTime;
+        this->completed_time = 0.0;
     }
 
 //    Area* operator = (const Area* a)

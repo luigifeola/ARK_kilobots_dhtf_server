@@ -25,8 +25,6 @@
 #include <QDir>
 
 #define STOP_AFTER 1800
-#define SAVE_LOG_EVERY 1
-#define SEND_ARK_MSG_EVERY 2
 
 // return pointer to interface!
 // mykilobotexperiment can and should be completely hidden from the application
@@ -48,8 +46,8 @@ mykilobotexperiment::mykilobotexperiment() {
     this->serviceInterval = 100; // timestep expressed in ms
 
 
-    // client = new ClientStuff("127.0.0.1", 7001); //local
-    client = new ClientStuff("143.167.48.37", 7001); //sheffield
+    client = new ClientStuff("127.0.0.1", 7001); //local
+    // client = new ClientStuff("143.167.48.37", 7001); //sheffield
     //    setStatus(client->getStatus());
     connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
     connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
@@ -369,20 +367,23 @@ void mykilobotexperiment::run() {
         dhtfEnvironment.update();
 
         // send buffer with READY areas
-        if(dhtfEnvironment.send_buffer.startsWith("T") && (qRound(this->time*10)%SEND_ARK_MSG_EVERY == 0))
+        if( (dhtfEnvironment.send_buffer.startsWith("T")) && (qRound(this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f )
         {
+            last_ARK_message = this->time;
             // WARNING: be carefull thant buffer is sent when is of active areas size + 1
             sendToServer(dhtfEnvironment.send_buffer);
             dhtfEnvironment.send_buffer.clear();
         }
     }
-    else if ((qRound(this->time*10)%SEND_ARK_MSG_EVERY == 0)) {
+
+    else if ( (qRound(this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f  ) {
+        last_ARK_message = this->time;
         sendToServer(QString("Missing initialisation"));
     }
 
 
     // BROADCAST START SIGNAL
-    if(this->time <= 2)
+    if(this->time <= 2.0)
     {
         kilobot_broadcast message;
         message.type = 1;
@@ -393,8 +394,9 @@ void mykilobotexperiment::run() {
     emit updateKilobotStates();
 
     // update visualization twice per second
-    if(qRound(this->time*10)%5 == 0) {
+    if( (qRound(this->time-last_env_update)*10.0f) >= env_update_period*10.0f ) {
         // clear current environment
+        last_env_update = this->time;
         clearDrawings();
         clearDrawingsOnRecordedImage();
 
@@ -404,7 +406,8 @@ void mykilobotexperiment::run() {
 
 
     // save LOG files and images for videos
-    if(qRound(this->time*10)%SAVE_LOG_EVERY == 0) {
+    if( (qRound(this->time-last_log)*10.0f) >= log_period*10.0f){
+        last_log = this->time;
         if(saveImages) {
             // qDebug() << "Saving Image";
             emit saveImage(QString("./images_client/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
@@ -521,7 +524,9 @@ void mykilobotexperiment::updateKilobotState(Kilobot kilobotCopy) {
 //    qDebug() << QString("in update KilobotStates");
 
     // update values for logging
-    if(logExp && (qRound(time*10)%SAVE_LOG_EVERY == 0)) {
+
+    if(logExp && (qRound(this->time-last_log)*10.0f) >= log_period*10.0f) {
+        last_log = this->time;
         kilobot_id k_id = kilobotCopy.getID();
         kilobot_colour k_colour = kilobotCopy.getLedColour();
         QPointF k_position = kilobotCopy.getPosition();

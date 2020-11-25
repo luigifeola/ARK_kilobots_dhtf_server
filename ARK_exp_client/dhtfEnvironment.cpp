@@ -136,7 +136,7 @@ void mykilobotenvironment::update() {
             {
                 if(completed[i] == 1)
                 {
-                     areas[i]->set_completed(this->completed_area);
+                     areas[i]->set_completed(this->time, this->completed_area);
 
                      qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
                      for(uint k : this->completed_area->kilobots_in_area)
@@ -154,7 +154,7 @@ void mykilobotenvironment::update() {
                 }
                 else
                 {
-                    areas[i]->Respawn();
+                    areas[i]->received_Respawn(this->time);
                 }
             }
         }
@@ -317,44 +317,15 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         QPoint center ((ARENA_CENTER*SCALING)+SHIFTX, (ARENA_CENTER*SCALING)+SHIFTY);
         int distance_from_centre_x = this->kilobots_positions[k_id].x()-center.x();
         int distance_from_centre_y = this->kilobots_positions[k_id].y()-center.y();
-        
 
-        // RANDOM WALK ------------> INSIDE_AREA
-        if( ((kilobots_states_LOG[k_id] == RANDOM_WALK && kilobots_states[k_id] == INSIDE_AREA) ||
-             (kilobots_colours[k_id] == Qt::black && kilobots_states[k_id] == INSIDE_AREA)) )
+
+        if(kilobots_states[k_id] == INSIDE_AREA/* && kilobots_colours[k_id] != Qt::red*/)
         {
-            // create and fill the message
-
             message.id = k_id;
             message.type = 1;   // sending inside to the kilobot
             message.data = timer_to_send; //seconds
 
-
-//            qDebug() << QString("Sending message to kilobot %1").arg(k_id);
-//            qDebug() << QString("Sending INSIDE");
-//            qDebug() << QString("TYPE: %1").arg(message.type);
-//            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
-
             // qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
-            lastSent[k_id] = this->time;
-            emit transmitKiloState(message);
-        }
-
-        // INSIDE_AREA ------------> RANDOM WALK
-        // LEAVING ----------------> RANDOM WALK
-        else if((kilobots_states_LOG[k_id] != RANDOM_WALK && kilobots_states[k_id] == RANDOM_WALK) /*|| (kilobots_colours[k_id] != Qt::black && kilobots_states[k_id] == RANDOM_WALK))*/ )
-        {
-
-            message.id = k_id;
-            message.type = 0;
-            message.data = 0;
-
-//            qDebug() << QString("Sending message to kilobot %1").arg(k_id);
-//            qDebug() << QString("Sending OUTSIDE");
-//            qDebug() << QString("TYPE: %1").arg(message.type);
-//            qDebug() << QString("Timer sent: %1").arg(message.data) << endl;
-
-            // qDebug() << "ARK EXP MESSAGE to " << k_id << " OUTSIDE, type " << message.type << "time:"<<this->time;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }
@@ -395,6 +366,17 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 lastSent[k_id] = this->time;
                 emit transmitKiloState(message);
             }
+        }
+
+        else if(kilobots_states[k_id] == RANDOM_WALK)
+        {
+            message.id = k_id;
+            message.type = 0;
+            message.data = 0;
+
+            // qDebug() << "ARK EXP MESSAGE to " << k_id << " OUTSIDE, type " << message.type << "time:"<<this->time;
+            lastSent[k_id] = this->time;
+            emit transmitKiloState(message);
         }
 //        else
 //            qDebug() << QString("NOT need to send a message to kilobot %1").arg(k_id) << endl;
