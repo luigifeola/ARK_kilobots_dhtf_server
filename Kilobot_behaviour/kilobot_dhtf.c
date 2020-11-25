@@ -80,7 +80,8 @@ uint32_t party_ticks = 0;
 /* Function for setting the motor speed                              */
 /*-------------------------------------------------------------------*/
 void set_motion(motion_t new_motion_type) {
-  if(current_motion_type != new_motion_type ) {
+  if(current_motion_type != new_motion_type ) 
+  {
     switch( new_motion_type ) {
     case FORWARD:
       spinup_motors();
@@ -118,60 +119,105 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
         int id2 = msg->data[3] << 2 | (msg->data[4] >> 6);
         int id3 = msg->data[6] << 2 | (msg->data[7] >> 6);
         
-        if (id1 == kilo_uid) {
+        if (id1 == kilo_uid) 
+        {
             sa_type = msg->data[1] >> 2 & 0x0F;
             sa_payload = ((msg->data[1]&0b11)  << 8) | (msg->data[2]);
 
-            
-            if(sa_type == 0 || sa_type == 1)
+            if(sa_type == 0)
             {
               location = sa_type;
-              if(location == INSIDE && internal_timeout == 0)
+              if(sa_payload !=0 && rotation_to_center == 0)
               {
-                internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+                // get rotation toward the center (if far from center)
+                // avoid colliding with the wall
+                uint8_t rotation_slice = (sa_payload >> 4) & 0x0F;
+                if(rotation_slice == 3) 
+                {
+                  rotation_to_center = -M_PI/3;
+                } 
+                else 
+                {
+                  rotation_to_center = (float)rotation_slice*M_PI/3; 
+                }
               }
             }
-            else if(sa_type == 3){
+
+            if(sa_type == 1)
+            {
+              location = sa_type;
+              if(current_state == RANDOM_WALKING && internal_timeout == 0)
+              {
+                internal_timeout = (sa_payload & 0x0F) * TIMEOUT_CONST * 10;
+              }
+              else if(current_state == LEAVING && rotation_to_center == 0)
+              {
+                // get rotation toward the center (if far from center)
+                // avoid colliding with the wall
+                uint8_t rotation_slice = (sa_payload >> 4) & 0x0F;
+                if(rotation_slice == 3) 
+                {
+                  rotation_to_center = -M_PI/3;
+                } 
+                else 
+                {
+                  rotation_to_center = (float)rotation_slice*M_PI/3; 
+                }
+              }
+            }
+
+            else if(sa_type == 3)
+            {
               current_state = PARTY;
               party_ticks = kilo_ticks;
-            }
-            else if (sa_type == 2 && rotation_to_center == 0 && internal_timeout == 0)  //if you are not yet rotating to the center and you are not INSIDE 
-            {
-              // get rotation toward the center (if far from center)
-              // avoid colliding with the wall
-              uint8_t rotation_slice = sa_payload;
-              if(rotation_slice == 3) {
-                rotation_to_center = -M_PI/3;
-              } else {
-                rotation_to_center = (float)rotation_slice*M_PI/3; 
-              }
             }
         }
 
-        if (id2 == kilo_uid) {
+        if (id2 == kilo_uid) 
+        {
             sa_type = msg->data[4] >> 2 & 0x0F;
             sa_payload = ((msg->data[4]&0b11)  << 8) | (msg->data[5]);
 
-            if(sa_type == 0 || sa_type == 1)
+            if(sa_type == 0)
             {
               location = sa_type;
-              if(location == INSIDE && internal_timeout == 0)
+              if(sa_payload !=0 && rotation_to_center == 0)
               {
-                internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+                // get rotation toward the center (if far from center)
+                // avoid colliding with the wall
+                uint8_t rotation_slice = (sa_payload >> 4) & 0x0F;
+                if(rotation_slice == 3) {
+                  rotation_to_center = -M_PI/3;
+                } else {
+                  rotation_to_center = (float)rotation_slice*M_PI/3; 
+                }
               }
             }
-            else if(sa_type == 3){
+
+            if(sa_type == 1)
+            {
+              location = sa_type;
+              if(current_state == RANDOM_WALKING && internal_timeout == 0)
+              {
+                internal_timeout = (sa_payload & 0x0F) * TIMEOUT_CONST * 10;
+              }
+              else if(current_state == LEAVING && rotation_to_center == 0)
+              {
+                // get rotation toward the center (if far from center)
+                // avoid colliding with the wall
+                uint8_t rotation_slice = (sa_payload >> 4) & 0x0F;
+                if(rotation_slice == 3) {
+                  rotation_to_center = -M_PI/3;
+                } else {
+                  rotation_to_center = (float)rotation_slice*M_PI/3; 
+                }
+              }
+            }
+
+            else if(sa_type == 3)
+            {
               current_state = PARTY;
               party_ticks = kilo_ticks;
-            }
-            else if (sa_type == 2 && rotation_to_center == 0 && internal_timeout == 0)
-            {
-              uint8_t rotation_slice = sa_payload;
-              if(rotation_slice == 3) {
-                rotation_to_center = -M_PI/3;
-              } else {
-                rotation_to_center = (float)rotation_slice*M_PI/3; 
-              }
             }
         }
 
@@ -179,26 +225,45 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
             sa_type = msg->data[7] >> 2 & 0x0F;
             sa_payload = ((msg->data[7]&0b11)  << 8) | (msg->data[8]);
 
-            if(sa_type == 0 || sa_type == 1)
+            if(sa_type == 0)
             {
               location = sa_type;
-              if(location == INSIDE && internal_timeout == 0)
+              if(sa_payload !=0 && rotation_to_center == 0)
               {
-                internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+                // get rotation toward the center (if far from center)
+                // avoid colliding with the wall
+                uint8_t rotation_slice = (sa_payload >> 4) & 0x0F;
+                if(rotation_slice == 3) {
+                  rotation_to_center = -M_PI/3;
+                } else {
+                  rotation_to_center = (float)rotation_slice*M_PI/3; 
+                }
               }
             }
+
+            if(sa_type == 1)
+            {
+              location = sa_type;
+              if(current_state == RANDOM_WALKING && internal_timeout == 0)
+              {
+                internal_timeout = (sa_payload & 0x0F) * TIMEOUT_CONST * 10;
+              }
+              else if(current_state == LEAVING && rotation_to_center == 0)
+              {
+                // get rotation toward the center (if far from center)
+                // avoid colliding with the wall
+                uint8_t rotation_slice = (sa_payload >> 4) & 0x0F;
+                if(rotation_slice == 3) {
+                  rotation_to_center = -M_PI/3;
+                } else {
+                  rotation_to_center = (float)rotation_slice*M_PI/3; 
+                }
+              }
+            }
+
             else if(sa_type == 3){
               current_state = PARTY;
               party_ticks = kilo_ticks;
-            }
-            else if (sa_type == 2 && rotation_to_center == 0 && internal_timeout == 0)
-            {
-              uint8_t rotation_slice = sa_payload;
-              if(rotation_slice == 3) {
-                rotation_to_center = -M_PI/3;
-              } else {
-                rotation_to_center = (float)rotation_slice*M_PI/3; 
-              }
             }
         }
 
@@ -210,7 +275,8 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
       start = 1;
     }
     /* For assign id message */
-    else if (msg->type == 120) {
+    else if (msg->type == 120) 
+    {
         int id = (msg->data[0] << 8) | msg->data[1];
         if (id == kilo_uid) {
             set_color(RGB(0,0,3));

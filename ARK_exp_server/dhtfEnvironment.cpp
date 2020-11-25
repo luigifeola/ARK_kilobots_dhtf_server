@@ -270,7 +270,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     for(int i=0; i<areas.size(); i++)
     {
 
-        if(areas[i]->isCompleted(this->time, this->completed_area, ready[i]) || areas[i]->completed)
+        if( areas[i]->isCompleted(this->time, this->completed_area, ready[i]) || (areas[i]->completed) )
         {
             // qDebug() << "Real area";
             // areas[i]->PrintArea();
@@ -405,19 +405,10 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         int distance_from_centre_y = this->kilobots_positions[k_id].y()-center.y();
 
 
-        if(kilobots_states[k_id] == INSIDE_AREA/* && kilobots_colours[k_id] != Qt::red*/)
-        {
-            message.id = k_id;
-            message.type = 1;   // sending inside to the kilobot
-            message.data = timer_to_send; //seconds
 
-            qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
-            lastSent[k_id] = this->time;
-            emit transmitKiloState(message);
-        }
 
         // Check kPos to perform wall avoidance
-        else if(abs(distance_from_centre_x) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) ||
+        if(abs(distance_from_centre_x) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) ||
                 abs(distance_from_centre_y) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER)) {
             // qDebug() << " COLLISION for kilobot " << k_id << " in position "<< kilobots_positions[k_id].x() << " " << kilobots_positions[k_id].y()
             //                                                             << " orientation " << qAtan2(QVector2D(kilobot_entity.getVelocity()).y(), QVector2D(kilobot_entity.getVelocity()).x());
@@ -441,24 +432,26 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             }
 
 
-            if(turning_in_msg != 0)
-            {
-                // store angle (no need if 0)
-                message.id = k_id;
-                message.type = 2;   // sending colliding to the kilobot
-                message.data = turning_in_msg;
-                // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
+            message.data = turning_in_msg;
+            message.data = message.data << 4;
+            // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
+        }
 
-                lastSent[k_id] = this->time;
-                emit transmitKiloState(message);
-            }
+        if(kilobots_states[k_id] == INSIDE_AREA && kilobots_colours[k_id] != Qt::red)
+        {
+            message.id = k_id;
+            message.type = 1;   // sending inside to the kilobot
+            message.data = message.data | timer_to_send; //seconds
+
+            qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
+            lastSent[k_id] = this->time;
+            emit transmitKiloState(message);
         }
 
         else if(kilobots_states[k_id] == RANDOM_WALK)
         {
             message.id = k_id;
             message.type = 0;
-            message.data = 0;
 
             qDebug() << "ARK EXP MESSAGE to " << k_id << " OUTSIDE, type " << message.type << "time:"<<this->time;
             lastSent[k_id] = this->time;

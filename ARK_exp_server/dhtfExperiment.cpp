@@ -454,7 +454,8 @@ void mykilobotexperiment::run() {
         if(logExp)
         {
             log_stream << this->time;
-            for(int i=0; i<kilobots.size();i++){
+            for(int i=0; i<kilobots.size();i++)
+            {
                  log_stream << "\t"
                             << kilobots[i].id << '\t'
                             << kilobots[i].colour << '\t'
