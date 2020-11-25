@@ -278,7 +278,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // qDebug() << "********copied area********";
             // this->completed_area->PrintArea();
 
-            if(this->time == this->completed_area->completed_time)
+            if(std::fabs(this->time - this->completed_area->completed_time) < 0.000001)
             {
                 qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
                 for(uint k : this->completed_area->kilobots_in_area)

@@ -24,8 +24,8 @@
 #include <QFile>
 #include <QDir>
 
-#define STOP_AFTER 3600
-#define SAVE_LOG_EVERY 5
+#define STOP_AFTER 1800
+#define SAVE_LOG_EVERY 1
 #define SEND_ARK_MSG_EVERY 2
 
 // return pointer to interface!

@@ -24,8 +24,8 @@
 #include <QFile>
 #include <QDir>
 
-#define STOP_AFTER 3600
-#define SAVE_LOG_EVERY 5
+#define STOP_AFTER 1800
+#define SAVE_LOG_EVERY 1
 #define SEND_ARK_MSG_EVERY 2
 
 // return pointer to interface!
@@ -123,13 +123,13 @@ void mykilobotexperiment::gotNewMesssage(QString msg)
     qDebug() << "Received a new message from the client: " << msg << " time:" << this->time;
     dhtfEnvironment.receive_buffer = msg;
 
-    for (QTcpSocket* clientsSocket : server->getClients())
-    {
-        if (server->sendToClient(clientsSocket, QString("Reply: received [%1]").arg(msg))== -1)
-        {
-            qDebug() << "Some error occured";
-        }
-    }
+//    for (QTcpSocket* clientsSocket : server->getClients())
+//    {
+//        if (server->sendToClient(clientsSocket, QString("Reply: received [%1]").arg(msg))== -1)
+//        {
+//            qDebug() << "Some error occured";
+//        }
+//    }
 }
 
 void mykilobotexperiment::on_pushButton_send_clicked()

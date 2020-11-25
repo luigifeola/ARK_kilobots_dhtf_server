@@ -378,10 +378,10 @@ void finite_state_machine(){
             break;
         }
         case PARTY : {
-          set_motion(TURN_LEFT);
+          set_motion(STOP);
           set_color(RGB(0,3,0));
           delay(500);
-          set_color(RGB(3,3,3));
+          set_color(RGB(3,0,3));
           delay(500);
           if(kilo_ticks > party_ticks + 10 * to_sec)
           {

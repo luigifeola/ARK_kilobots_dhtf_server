@@ -55,15 +55,14 @@ public:
         this->completed = false;
         this->kilobots_in_area.clear();
 
+        this->respawn_timer = 40;
 
         if(type == HARD_TASK)
         {
-            this->respawn_timer = 50;
             this->color = Qt::red;
         }
         else
         {
-            this->respawn_timer = 30;
             this->color = Qt::blue;
         }
 
