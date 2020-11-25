@@ -280,14 +280,14 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
             if(this->time == this->completed_area->completed_time)
             {
-                qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area;
+                qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
                 for(uint k : this->completed_area->kilobots_in_area)
                 {
                     kilobot_message party_message;
                     party_message.id = k;
                     party_message.type = PARTY;
                     party_message.data = 0;
-                    qDebug() << "Party for kID: " << k << "type: "<< party_message.type;
+                    // qDebug() << "Party for kID: " << k << "type: "<< party_message.type;
                     emit transmitKiloState(party_message);
                 }
 
@@ -475,7 +475,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 message.id = k_id;
                 message.type = 2;   // sending colliding to the kilobot
                 message.data = turning_in_msg;
-                // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
+                qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
                 emit transmitKiloState(message);
             }
         }

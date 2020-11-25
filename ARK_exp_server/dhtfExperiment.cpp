@@ -120,7 +120,7 @@ void mykilobotexperiment::smbDisconnectedFromServer()
 
 void mykilobotexperiment::gotNewMesssage(QString msg)
 {
-    qDebug() << QString("Received a new message from the client: %1").arg(msg);
+    qDebug() << "Received a new message from the client: " << msg << " time:" << this->time;
     dhtfEnvironment.receive_buffer = msg;
 
     for (QTcpSocket* clientsSocket : server->getClients())
@@ -145,7 +145,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToClient(QString msg)
 {
-    qDebug() << "Sending to client the message: " << msg;
+    qDebug() << "Sending to client the message: " << msg << " time:" << this->time;
     for (QTcpSocket* clientsSocket : server->getClients())
     {
         if (server->sendToClient(clientsSocket, msg) == -1)
@@ -483,7 +483,7 @@ void mykilobotexperiment::run() {
         if(dhtfEnvironment.saveLOG)
         {
             dhtfEnvironment.saveLOG = false;
-            qDebug() << "LOG_EXP: saving at " << this->time*10;
+            qDebug() << "LOG_completed_areas: saving at " << this->time*10;
 
 
             log_stream_areas
@@ -545,14 +545,14 @@ void mykilobotexperiment::setupInitialKilobotState(Kilobot kilobot_entity) {
     KiloLog kLog(k_id, kilobot_entity.getPosition(), 0, kilobot_entity.getLedColour());
     kLog.state=RANDOM_WALK;
     kilobots[k_id] = kLog;
-    qDebug() << "ORIENTATION IS " << kilobots[k_id].orientation;
+    // qDebug() << "ORIENTATION IS " << kilobots[k_id].orientation;
     if(!kilobots_ids.contains(k_id))
         kilobots_ids.append(k_id);
 
     double timeForAMessage = 0.05; // 50 ms each message
     dhtfEnvironment.minTimeBetweenTwoMsg = kilobots_ids.size()*timeForAMessage/2.8;
     dhtfEnvironment.lastSent[k_id] = dhtfEnvironment.minTimeBetweenTwoMsg;
-    qDebug() << "Min time between two messages is" << dhtfEnvironment.minTimeBetweenTwoMsg;
+    // qDebug() << "Min time between two messages is" << dhtfEnvironment.minTimeBetweenTwoMsg;
 
 }
 

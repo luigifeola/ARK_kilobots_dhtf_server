@@ -48,8 +48,8 @@ mykilobotexperiment::mykilobotexperiment() {
     this->serviceInterval = 100; // timestep expressed in ms
 
 
-    client = new ClientStuff("127.0.0.1", 7001); //local
-    // client = new ClientStuff("143.167.48.37", 7001); //sheffield
+    // client = new ClientStuff("127.0.0.1", 7001); //local
+    client = new ClientStuff("143.167.48.37", 7001); //sheffield
     //    setStatus(client->getStatus());
     connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
     connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
@@ -234,7 +234,7 @@ void mykilobotexperiment::initialise(bool isResume) {
             log_file.close();
         }
         // log filename consist of the prefix and current date and time
-        log_filename = log_filename_prefix + "_kilopos_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_filename = log_filename_prefix + "_kilopos_client_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
         log_file.setFileName(log_filename);
         // open the file
         if(log_file.open(QIODevice::WriteOnly)) {
@@ -274,7 +274,7 @@ void mykilobotexperiment::initialise(bool isResume) {
             log_file1.close();
         }
         // log filename consist of the prefix and current date and time
-        log_filename = log_filename_prefix + "_areapos_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_filename = log_filename_prefix + "_areapos_client_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
         log_file1.setFileName(log_filename);
         // open the file
         if(log_file1.open(QIODevice::WriteOnly)) {
@@ -308,7 +308,7 @@ void mykilobotexperiment::initialise(bool isResume) {
 
     // if the checkbox for saving the images is checked
     if(saveImages) {
-        emit saveImage(QString("./images/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+        emit saveImage(QString("./images_client/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
     }
 
     // clear old drawings (e.g., from ID-identification)
