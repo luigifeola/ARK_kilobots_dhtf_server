@@ -292,15 +292,16 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         // red+outside = task accomplished
         // blue+outside = leaving procedure from task is terminated
 
-        /* Prepare the inividual kilobot's message         */
-        /* see README.md to understand about ARK messaging */
-        /* data has 3x24 bits divided as                   */
-        /*   ID 10b    type 4b  data 10b     <- ARK msg    */
-        /*  data[0]   data[1]   data[2]      <- kb msg     */
-        /* xxxx xxxx xxyy yyzz zzzz zzzz     <- dhtf       */
-        /* x bits used for kilobot id                      */
-        /* y bits used for inside/outside                  */
-        /* z bits used for timer to wait for others kb     */
+        /* Prepare the inividual kilobot's message                   */
+        /* see README.md to understand about ARK messaging           */
+        /* data has 3x24 bits divided as                             */
+        /*   ID 10b    type 4b  data 10b     <- ARK msg              */
+        /*  data[0]   data[1]   data[2]      <- kb msg               */
+        /* xxxx xxxx xxyy yy// wwww zzzz     <- dhtf                 */
+        /* x bits used for kilobot id                                */
+        /* y bits used for inside/outside                            */
+        /* w bits used for wall avoidance                            */
+        /* z bits used for timer to wait for others kb (if inside)   */
 
         kilobot_message message; // this is a 24 bits field not the original kb message
         // make sure to start clean
@@ -334,6 +335,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // use atan2 to get angle between two vectors
             double angle = qAtan2(ori.y(), ori.x()) - qAtan2(pos.y(), pos.x());
 
+            // double angle = qAtan2(-kilobot_entity.getVelocity().y(), kilobot_entity.getVelocity().x()) - qAtan2(pos.y(), pos.x());
+            
             if(angle > M_PI*3/4 || angle < -M_PI*3/4) {
                  turning_in_msg = 2;
             } else if(angle < -M_PI/2) {
@@ -348,7 +351,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
         }
 
-        if(kilobots_states[k_id] == INSIDE_AREA && kilobots_colours[k_id] != Qt::red)
+        if( (kilobots_states[k_id] == INSIDE_AREA || kilobots_states[k_id] == LEAVING) && kilobots_colours[k_id] != Qt::red)
         {
             message.id = k_id;
             message.type = 1;   // sending inside to the kilobot

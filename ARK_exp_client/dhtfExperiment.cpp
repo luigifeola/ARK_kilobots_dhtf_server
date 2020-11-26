@@ -278,26 +278,26 @@ void mykilobotexperiment::initialise(bool isResume) {
         if(log_file1.open(QIODevice::WriteOnly)) {
             qDebug() << "Log file " << log_file1.fileName() << " opened";
             log_stream1.setDevice(&log_file1);
-            log_stream1
-                    << "time" << '\t'
-                    << "id" << '\t'
-                    << "positionX" << '\t'
-                    << "positionY" << '\t'
-                    << "colour" << '\t'
-                    << "state" << '\n';
+//            log_stream1
+//                    << "time" << '\t'
+//                    << "id" << '\t'
+//                    << "positionX" << '\t'
+//                    << "positionY" << '\t'
+//                    << "colour" << '\t'
+//                    << "state" << '\n';
             //Initial state
-
+            log_stream1 << this->time;
             for(Area* a : dhtfEnvironment.areas)
             {
-                log_stream1
-                        << this->time << '\t'
-                        << a->id << '\t'
-                        << a->position.x() << '\t'
-                        << a->position.y() << '\t'
-                        << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
-                        << (a->completed == true ? 1:0) << '\n';
+                log_stream1 << '\t'
+                            << a->id << '\t'
+                            << a->position.x() << '\t'
+                            << a->position.y() << '\t'
+                            << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
+                            << (a->completed == true ? 1:0);
 
             }
+            log_stream1 << endl;
         }
         else {
             qDebug() << "ERROR opening file "<< log_filename;
@@ -426,20 +426,21 @@ void mykilobotexperiment::run() {
                             << kilobots[i].position.y() << '\t'
                             << kilobots[i].orientation <<'\t'
                             << kilobots[i].state;
-             }
-             log_stream << endl;
+            }
+            log_stream << endl;
 
+            log_stream1 << this->time;
             for(Area* a : dhtfEnvironment.areas)
             {
-                log_stream1
-                        << this->time << '\t'
-                        << a->id << '\t'
-                        << a->position.x() << '\t'
-                        << a->position.y() << '\t'
-                        << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
-                        << (a->completed == true ? 1:0) << '\n';
+                log_stream1 << '\t'
+                            << a->id << '\t'
+                            << a->position.x() << '\t'
+                            << a->position.y() << '\t'
+                            << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
+                            << (a->completed == true ? 1:0);
 
             }
+            log_stream1 << endl;
 
         }
     }
@@ -519,7 +520,7 @@ void mykilobotexperiment::setupInitialKilobotState(Kilobot kilobot_entity) {
     double timeForAMessage = 0.05; // 50 ms each message
     dhtfEnvironment.minTimeBetweenTwoMsg = kilobots_ids.size()*timeForAMessage/2.8;
     dhtfEnvironment.lastSent[k_id] = dhtfEnvironment.minTimeBetweenTwoMsg;
-    qDebug() << "Min time between two messages is" << dhtfEnvironment.minTimeBetweenTwoMsg;
+    // qDebug() << "Min time between two messages is" << dhtfEnvironment.minTimeBetweenTwoMsg;
 
 }
 

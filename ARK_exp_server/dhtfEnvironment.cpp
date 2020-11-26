@@ -304,39 +304,9 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         // inside bigger radius (radius)
         if(areas[i]->isInside(kilobot_entity.getPosition()))
         {
-            // inside small radius (radius - kilodiameter)
-            if(areas[i]->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING / 2) && kilobots_states[k_id] == RANDOM_WALK)
+
+            if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == LEAVING)
             {
-                if(std::find(areas[i]->kilobots_in_area.begin(),areas[i]->kilobots_in_area.end(), k_id) == areas[i]->kilobots_in_area.end())
-                    areas[i]->kilobots_in_area.push_back(k_id);
-                kilobots_states_LOG[k_id] = kilobots_states[k_id];
-                kilobots_states[k_id] = INSIDE_AREA;
-
-                timer_to_send = areas[i]->waiting_timer / 10;
-                found = true;
-                break;
-            }
-
-            if( (kilobots_colours[k_id] == Qt::black || kilobots_states[k_id] == RANDOM_WALK) ||
-                ((kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == INSIDE_AREA) && kilobots_colours[k_id] != Qt::blue)  )
-            {
-                if(kilobots_states[k_id] == INSIDE_AREA && kilobots_colours[k_id] == Qt::red)
-                {
-                    kilobots_states_LOG[k_id] = kilobots_states[k_id];
-                }
-
-
-                if(std::find(areas[i]->kilobots_in_area.begin(),areas[i]->kilobots_in_area.end(), k_id) == areas[i]->kilobots_in_area.end())
-                    areas[i]->kilobots_in_area.push_back(k_id);
-                found = true;
-                break;
-            }
-            else if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == LEAVING)
-            {
-                // if(kilobots_colours[k_id] == Qt::blue)
-                    // qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
-                if(kilobots_states[k_id] == LEAVING)
-                    kilobots_states_LOG[k_id] = kilobots_states[k_id];
                 kilobots_states[k_id] = LEAVING;
                 areas[i]->kilobots_in_area.erase(std::remove(areas[i]->kilobots_in_area.begin(), areas[i]->kilobots_in_area.end(), k_id),
                                           areas[i]->kilobots_in_area.end());
@@ -345,9 +315,27 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 break;
             }
 
+            else
+            {
+                if(std::find(areas[i]->kilobots_in_area.begin(),areas[i]->kilobots_in_area.end(), k_id) == areas[i]->kilobots_in_area.end())
+                    areas[i]->kilobots_in_area.push_back(k_id);
+
+                // inside small radius (radius - kilodiameter)
+                if(areas[i]->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING / 2))
+                {
+                    kilobots_states[k_id] = INSIDE_AREA;
+
+                    timer_to_send = areas[i]->waiting_timer / 10;
+                }
+
+                found = true;
+                break;
+            }
+
         }
         // outside
         // NOTE: if kilobot passes from blue to black you should remove it from the area position
+        //if not in this area remove k_id from it
         else
         {
             areas[i]->kilobots_in_area.erase(std::remove(areas[i]->kilobots_in_area.begin(), areas[i]->kilobots_in_area.end(), k_id),
@@ -356,6 +344,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
     }
 
+    // if in no area
     if(!found)
     {
         if(kilobots_states[k_id] == RANDOM_WALK)
@@ -370,7 +359,6 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
 
 
-    // qDebug() << QString("Sending message");
     // now we have everything up to date and everything we need
     // then if it is time to send the message to the kilobot send info to the kb
     if(this->time - this->lastSent[k_id] > minTimeBetweenTwoMsg){
@@ -379,15 +367,16 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         // red+outside = task accomplished
         // blue+outside = leaving procedure from task is terminated
 
-        /* Prepare the inividual kilobot's message         */
-        /* see README.md to understand about ARK messaging */
-        /* data has 3x24 bits divided as                   */
-        /*   ID 10b    type 4b  data 10b     <- ARK msg    */
-        /*  data[0]   data[1]   data[2]      <- kb msg     */
-        /* xxxx xxxx xxyy yyzz zzzz zzzz     <- dhtf       */
-        /* x bits used for kilobot id                      */
-        /* y bits used for inside/outside                  */
-        /* z bits used for timer to wait for others kb     */
+        /* Prepare the inividual kilobot's message                   */
+        /* see README.md to understand about ARK messaging           */
+        /* data has 3x24 bits divided as                             */
+        /*   ID 10b    type 4b  data 10b     <- ARK msg              */
+        /*  data[0]   data[1]   data[2]      <- kb msg               */
+        /* xxxx xxxx xxyy yy// wwww zzzz     <- dhtf                 */
+        /* x bits used for kilobot id                                */
+        /* y bits used for inside/outside                            */
+        /* w bits used for wall avoidance                            */
+        /* z bits used for timer to wait for others kb (if inside)   */
 
         kilobot_message message; // this is a 24 bits field not the original kb message
         // make sure to start clean
@@ -421,6 +410,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // use atan2 to get angle between two vectors
             double angle = qAtan2(ori.y(), ori.x()) - qAtan2(pos.y(), pos.x());
 
+            // double angle = qAtan2(-kilobot_entity.getVelocity().y(), kilobot_entity.getVelocity().x()) - qAtan2(pos.y(), pos.x());
+
             if(angle > M_PI*3/4 || angle < -M_PI*3/4) {
                  turning_in_msg = 2;
             } else if(angle < -M_PI/2) {
@@ -435,7 +426,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
         }
 
-        if(kilobots_states[k_id] == INSIDE_AREA && kilobots_colours[k_id] != Qt::red)
+        if( (kilobots_states[k_id] == INSIDE_AREA || kilobots_states[k_id] == LEAVING) && kilobots_colours[k_id] != Qt::red)
         {
             message.id = k_id;
             message.type = 1;   // sending inside to the kilobot

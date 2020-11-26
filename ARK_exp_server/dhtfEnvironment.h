@@ -34,8 +34,8 @@
 #define ARENA_SIZE 2000
 #define KILO_DIAMETER 66 //cnr
 // #define KILO_DIAMETER 33 //sheffield
-#define ACTIVE_AREAS 9
-#define HARD_TASKS_NUMBER 1
+#define ACTIVE_AREAS 8
+#define HARD_TASKS_NUMBER 4
 
 typedef enum {
     RANDOM_WALK=0,
