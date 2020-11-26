@@ -499,8 +499,14 @@ void mykilobotexperiment::run() {
                        << dhtfEnvironment.completed_area->creation_time << '\t'
                        << dhtfEnvironment.completed_area->completed_time << '\t'
                        << int(dhtfEnvironment.completed_area->type) << '\t'
-                       << dhtfEnvironment.completed_area->kilobots_in_area.size() << '\t'
-                       << endl;
+                       << dhtfEnvironment.completed_area->kilobots_in_area.size();
+
+            for(int i=0; i<dhtfEnvironment.completed_area->kilobots_in_area.size(); i++)
+            {
+                log_stream_areas << '\t' <<dhtfEnvironment.completed_area->kilobots_in_area.at(i);
+            }
+
+            log_stream_areas << endl;
         }
 
 
