@@ -382,7 +382,7 @@ void finite_state_machine(){
     /* State transition */
     switch (current_state) {
         case RANDOM_WALKING : {
-            if(location == INSIDE){
+            if(location == INSIDE && internal_timeout !=0 ){
                 set_motion(STOP);
 
                 last_waiting_ticks = kilo_ticks;
