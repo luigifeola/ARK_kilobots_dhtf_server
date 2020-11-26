@@ -394,7 +394,7 @@ void mykilobotexperiment::run() {
     emit updateKilobotStates();
 
     // update visualization twice per second
-    if( (qRound(this->time-last_env_update)*10.0f) >= env_update_period*10.0f ) {
+    if( qRound((this->time-last_env_update)*10.0f) >= env_update_period*10.0f ) {
         // clear current environment
         last_env_update = this->time;
         clearDrawings();
@@ -404,17 +404,21 @@ void mykilobotexperiment::run() {
         plotEnvironment();
     }
 
-
     // save LOG files and images for videos
-    if( (qRound(this->time-last_log)*10.0f) >= log_period*10.0f){
+    if( qRound((this->time - last_log)*10.0f) >= log_period*10.0f)
+    {
+        qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
+        qDebug() << "LOGs saving at " << this->time*10;
         last_log = this->time;
         if(saveImages) {
             // qDebug() << "Saving Image";
             emit saveImage(QString("./images_client/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
         }
-        if(logExp){
+        if(logExp)
+        {
             log_stream << this->time;
-            for(int i=0; i<kilobots.size();i++){
+            for(int i=0; i<kilobots.size();i++)
+            {
                  log_stream << "\t"
                             << kilobots[i].id << '\t'
                             << kilobots[i].colour << '\t'
@@ -508,7 +512,7 @@ void mykilobotexperiment::setupInitialKilobotState(Kilobot kilobot_entity) {
     KiloLog kLog(k_id, kilobot_entity.getPosition(), 0, kilobot_entity.getLedColour());
     kLog.state=RANDOM_WALK;
     kilobots[k_id] = kLog;
-    qDebug() << "ORIENTATION IS " << kilobots[k_id].orientation;
+    // qDebug() << "ORIENTATION IS " << kilobots[k_id].orientation;
     if(!kilobots_ids.contains(k_id))
         kilobots_ids.append(k_id);
 
@@ -524,9 +528,8 @@ void mykilobotexperiment::updateKilobotState(Kilobot kilobotCopy) {
 //    qDebug() << QString("in update KilobotStates");
 
     // update values for logging
-
-    if(logExp && (qRound(this->time-last_log)*10.0f) >= log_period*10.0f) {
-        last_log = this->time;
+    if(logExp) 
+    {
         kilobot_id k_id = kilobotCopy.getID();
         kilobot_colour k_colour = kilobotCopy.getLedColour();
         QPointF k_position = kilobotCopy.getPosition();

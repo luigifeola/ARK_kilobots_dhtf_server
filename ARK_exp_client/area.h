@@ -31,7 +31,7 @@ class Area
 {
 public:
     uint id; // area id (0...15)
-    uint8_t type; /* hard or soft task, i.e. RED or BLUE */
+    uint8_t type; //hard or soft task, i.e. RED or BLUE
     // uint8_t other_type; /* hard or soft task on the other side */
 
     QPointF position; /* Center of the task */
@@ -55,15 +55,14 @@ public:
         this->completed = false;
         this->kilobots_in_area.clear();
 
+        this->respawn_timer = 40;
 
         if(type == HARD_TASK)
         {
-            this->respawn_timer = 50.0;
             this->color = Qt::red;
         }
         else
         {
-            this->respawn_timer = 30.0;
             this->color = Qt::blue;
         }
 
@@ -144,17 +143,7 @@ public:
         this->creation_time = kTime;
         this->completed_time = 0.0;
     }
-
-//    Area* operator = (const Area* a)
-//    {
-//        this->creation_time = a->creation_time;
-//        this->creation_time = a->creation_time;
-//        this->type = a->type;
-//        this->kilobots_in_area = a->kilobots_in_area;
-
-//        return this;
-//    }
-
+    
     bool operator !=(const Area* a)
     {
         return (this->id != a->id || this->completed_time != a->completed_time);

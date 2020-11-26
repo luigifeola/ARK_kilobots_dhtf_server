@@ -410,9 +410,10 @@ void mykilobotexperiment::run() {
         sendToClient(dhtfEnvironment.initialise_buffer);
     }
 
-    //else if(dhtfEnvironment.send_buffer.startsWith("A") && std::fmod(this->time,2.0) > 2.0-0.1)// if(true)
-    else if(dhtfEnvironment.send_buffer.startsWith("A") && (qRound(this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f )
+
+    else if(dhtfEnvironment.send_buffer.startsWith("A") && qRound((this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f )
     {
+        qDebug() << "ARK messages time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
         last_ARK_message = this->time;
         sendToClient(dhtfEnvironment.send_buffer);
         dhtfEnvironment.send_buffer.clear();
@@ -421,7 +422,7 @@ void mykilobotexperiment::run() {
     dhtfEnvironment.update();
 
     // BROADCAST START SIGNAL
-    if(this->time <= 2)
+    if(this->time <= 2.0)
     {
         kilobot_broadcast message;
         message.type = 1;
@@ -432,7 +433,7 @@ void mykilobotexperiment::run() {
     emit updateKilobotStates();
 
     // update visualization twice per second
-    if( (qRound(this->time-last_env_update)*10.0f) >= env_update_period*10.0f ) {
+    if( qRound((this->time-last_env_update)*10.0f) >= env_update_period*10.0f ) {
         // clear current environment
         last_env_update = this->time;
         clearDrawings();
@@ -443,8 +444,9 @@ void mykilobotexperiment::run() {
     }
 
     // save LOG files and images for videos
-    if( (qRound(this->time - last_log)*10.0f) >= log_period*10.0f)
+    if( qRound((this->time - last_log)*10.0f) >= log_period*10.0f)
     {
+        qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
         qDebug() << "LOGs saving at " << this->time*10;
         last_log = this->time;
         if(saveImages) {
@@ -487,7 +489,7 @@ void mykilobotexperiment::run() {
         if(dhtfEnvironment.saveLOG)
         {
             dhtfEnvironment.saveLOG = false;
-            qDebug() << "LOG_completed_areas: saving at " << this->time*10;
+            qDebug() << "LOG_EXP: saving at " << this->time*10;
 
 
             log_stream_areas
@@ -565,7 +567,8 @@ void mykilobotexperiment::updateKilobotState(Kilobot kilobotCopy) {
 //    qDebug() << QString("in update KilobotStates");
 
     // update values for logging
-    if(logExp) {
+    if(logExp) 
+    {
         kilobot_id k_id = kilobotCopy.getID();
         kilobot_colour k_colour = kilobotCopy.getLedColour();
         QPointF k_position = kilobotCopy.getPosition();

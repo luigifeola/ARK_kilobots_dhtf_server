@@ -24,11 +24,11 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
     this->ArenaY = 0.45;
 
     this->saveLOG = false;
+    this->send_buffer = "";
+    this->receive_buffer = "";
 
     this->initialised_client = false;
     this->initialise_buffer = "";
-    this->send_buffer = "";
-    this->receive_buffer= "";
     // define environment:
     // call any functions to setup features in the environment (goals, homes locations and parameters).
     reset();
@@ -333,8 +333,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             }
             else if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == LEAVING)
             {
-//                if(kilobots_colours[k_id] == Qt::blue)
-//                    qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
+                // if(kilobots_colours[k_id] == Qt::blue)
+                    // qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
                 if(kilobots_states[k_id] == LEAVING)
                     kilobots_states_LOG[k_id] = kilobots_states[k_id];
                 kilobots_states[k_id] = LEAVING;
@@ -405,11 +405,9 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         int distance_from_centre_y = this->kilobots_positions[k_id].y()-center.y();
 
 
-
-
         // Check kPos to perform wall avoidance
-        if(abs(distance_from_centre_x) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) ||
-                abs(distance_from_centre_y) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER)) {
+        if( abs(distance_from_centre_x) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) ||
+            abs(distance_from_centre_y) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) ){
             // qDebug() << " COLLISION for kilobot " << k_id << " in position "<< kilobots_positions[k_id].x() << " " << kilobots_positions[k_id].y()
             //                                                             << " orientation " << qAtan2(QVector2D(kilobot_entity.getVelocity()).y(), QVector2D(kilobot_entity.getVelocity()).x());
             // get position translated w.r.t. center of arena
