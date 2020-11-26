@@ -99,8 +99,8 @@ void mykilobotenvironment::reset(){
     kilobots_colours.clear();
 
     std::default_random_engine re;
-    re.seed(0);
-//    re.seed(qrand());
+//    re.seed(0);
+    re.seed(qrand());
     QVector<int> activated_areas;
     QVector<uint> hard_tasks;
     QVector<uint> hard_tasks_client;
