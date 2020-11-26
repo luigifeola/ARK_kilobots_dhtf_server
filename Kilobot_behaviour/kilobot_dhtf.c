@@ -174,8 +174,8 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
 
         if (id2 == kilo_uid) 
         {
-          sa_type = msg->data[1] >> 2 & 0x0F;
-          sa_payload = ((msg->data[1]&0b11)  << 8) | (msg->data[2]);
+          sa_type = msg->data[4] >> 2 & 0x0F;
+          sa_payload = ((msg->data[4]&0b11)  << 8) | (msg->data[5]);
           
           switch( sa_type ) {
             case 0:
@@ -226,8 +226,8 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
         }
 
         if (id3 == kilo_uid) {
-           sa_type = msg->data[1] >> 2 & 0x0F;
-          sa_payload = ((msg->data[1]&0b11)  << 8) | (msg->data[2]);
+           sa_type = msg->data[7] >> 2 & 0x0F;
+           sa_payload = ((msg->data[7]&0b11)  << 8) | (msg->data[8]);
           
           switch( sa_type ) {
             case 0:
