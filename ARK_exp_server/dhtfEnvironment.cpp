@@ -280,16 +280,19 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
             if(std::fabs(this->time - this->completed_area->completed_time) < 0.000001)
             {
-                qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
+                // qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
                 for(uint k : this->completed_area->kilobots_in_area)
                 {
-                    kilobot_message party_message;
-                    party_message.id = k;
-                    party_message.type = PARTY;
-                    party_message.data = 0;
-                    qDebug() << "time:"<<this->time << " ARK PARTY MESSAGE to " << k;
-                    lastSent[k] = this->time;
-                    emit transmitKiloState(party_message);
+                    if(k == k_id)
+                    {
+                        kilobot_message party_message;
+                        party_message.id = k;
+                        party_message.type = PARTY;
+                        party_message.data = 0;
+                        qDebug() << "time:"<<this->time << " ARK PARTY MESSAGE to " << k;
+                        lastSent[k] = this->time;
+                        emit transmitKiloState(party_message);
+                    }
                 }
 
                 this->saveLOG = true;
