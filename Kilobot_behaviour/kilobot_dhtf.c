@@ -76,6 +76,8 @@ uint32_t last_waiting_ticks = 0;
 
 uint32_t party_ticks = 0;
 
+bool collision_avoidance_test = false;
+
 /*-------------------------------------------------------------------*/
 /* Function for setting the motor speed                              */
 /*-------------------------------------------------------------------*/
@@ -107,7 +109,65 @@ void set_motion(motion_t new_motion_type) {
   }
 }
 
+/*-------------------------------------------------------------------*/
+/* Parse ARK received messages                                       */
+/*-------------------------------------------------------------------*/
+void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index) 
+{
+  // index of first element in the 3 sub-blocks of data
+  uint8_t shift = kb_index*3;
 
+  sa_type = data[shift+1] >> 2 & 0x0F;
+  sa_payload = ((data[shift+1]&0b11)  << 8) | (data[shift+2]);
+  
+  switch( sa_type ) {
+    case 0:
+      location = sa_type;
+      if(sa_payload !=0 && rotation_to_center == 0)
+      {
+        // get rotation toward the center (if far from center)
+        // avoid colliding with the wall
+        uint8_t rotation_slice = sa_payload;
+        if(rotation_slice == 3) 
+        {
+          rotation_to_center = -M_PI/3;
+        } 
+        else 
+        {
+          rotation_to_center = (float)rotation_slice*M_PI/3; 
+        }
+      }
+      break;
+
+    case 1:
+      location = sa_type;
+      internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+      break;
+    
+    case 2:
+      if(sa_payload !=0 && rotation_to_center == 0)
+      {
+        // get rotation toward the center (if far from center)
+        // avoid colliding with the wall
+        uint8_t rotation_slice = sa_payload;
+        if(rotation_slice == 3) 
+        {
+          rotation_to_center = -M_PI/3;
+        } 
+        else 
+        {
+          rotation_to_center = (float)rotation_slice*M_PI/3; 
+        }
+      }
+      break;
+    
+    case 3:
+      current_state = PARTY;
+      party_ticks = kilo_ticks;
+      break;
+  }
+
+}
 /*-------------------------------------------------------------------*/
 /* Callback function for message reception                           */
 /*-------------------------------------------------------------------*/
@@ -119,162 +179,14 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
         int id2 = msg->data[3] << 2 | (msg->data[4] >> 6);
         int id3 = msg->data[6] << 2 | (msg->data[7] >> 6);
         
-        if (id1 == kilo_uid) 
-        {
-          sa_type = msg->data[1] >> 2 & 0x0F;
-          sa_payload = ((msg->data[1]&0b11)  << 8) | (msg->data[2]);
-          
-          switch( sa_type ) {
-            case 0:
-              location = sa_type;
-              if(sa_payload !=0 && rotation_to_center == 0)
-              {
-                // get rotation toward the center (if far from center)
-                // avoid colliding with the wall
-                uint8_t rotation_slice = sa_payload;
-                if(rotation_slice == 3) 
-                {
-                  rotation_to_center = -M_PI/3;
-                } 
-                else 
-                {
-                  rotation_to_center = (float)rotation_slice*M_PI/3; 
-                }
-              }
-              break;
-
-            case 1:
-              location = sa_type;
-              internal_timeout = sa_payload * TIMEOUT_CONST * 10;
-              break;
-            
-            case 2:
-              if(sa_payload !=0 && rotation_to_center == 0)
-              {
-                // get rotation toward the center (if far from center)
-                // avoid colliding with the wall
-                uint8_t rotation_slice = sa_payload;
-                if(rotation_slice == 3) 
-                {
-                  rotation_to_center = -M_PI/3;
-                } 
-                else 
-                {
-                  rotation_to_center = (float)rotation_slice*M_PI/3; 
-                }
-              }
-              break;
-            
-            case 3:
-              current_state = PARTY;
-              party_ticks = kilo_ticks;
-              break;
-          }
-        }
-
-        if (id2 == kilo_uid) 
-        {
-          sa_type = msg->data[4] >> 2 & 0x0F;
-          sa_payload = ((msg->data[4]&0b11)  << 8) | (msg->data[5]);
-          
-          switch( sa_type ) {
-            case 0:
-              location = sa_type;
-              if(sa_payload !=0 && rotation_to_center == 0)
-              {
-                // get rotation toward the center (if far from center)
-                // avoid colliding with the wall
-                uint8_t rotation_slice = sa_payload;
-                if(rotation_slice == 3) 
-                {
-                  rotation_to_center = -M_PI/3;
-                } 
-                else 
-                {
-                  rotation_to_center = (float)rotation_slice*M_PI/3; 
-                }
-              }
-              break;
-
-            case 1:
-              location = sa_type;
-              internal_timeout = sa_payload * TIMEOUT_CONST * 10;
-              break;
-            
-            case 2:
-              if(sa_payload !=0 && rotation_to_center == 0)
-              {
-                // get rotation toward the center (if far from center)
-                // avoid colliding with the wall
-                uint8_t rotation_slice = sa_payload;
-                if(rotation_slice == 3) 
-                {
-                  rotation_to_center = -M_PI/3;
-                } 
-                else 
-                {
-                  rotation_to_center = (float)rotation_slice*M_PI/3; 
-                }
-              }
-              break;
-            
-            case 3:
-              current_state = PARTY;
-              party_ticks = kilo_ticks;
-              break;
-          }
-        }
-
-        if (id3 == kilo_uid) {
-           sa_type = msg->data[7] >> 2 & 0x0F;
-           sa_payload = ((msg->data[7]&0b11)  << 8) | (msg->data[8]);
-          
-          switch( sa_type ) {
-            case 0:
-              location = sa_type;
-              if(sa_payload !=0 && rotation_to_center == 0)
-              {
-                // get rotation toward the center (if far from center)
-                // avoid colliding with the wall
-                uint8_t rotation_slice = sa_payload;
-                if(rotation_slice == 3) 
-                {
-                  rotation_to_center = -M_PI/3;
-                } 
-                else 
-                {
-                  rotation_to_center = (float)rotation_slice*M_PI/3; 
-                }
-              }
-              break;
-
-            case 1:
-              location = sa_type;
-              internal_timeout = sa_payload * TIMEOUT_CONST * 10;
-              break;
-            
-            case 2:
-              if(sa_payload !=0 && rotation_to_center == 0)
-              {
-                // get rotation toward the center (if far from center)
-                // avoid colliding with the wall
-                uint8_t rotation_slice = sa_payload;
-                if(rotation_slice == 3) 
-                {
-                  rotation_to_center = -M_PI/3;
-                } 
-                else 
-                {
-                  rotation_to_center = (float)rotation_slice*M_PI/3; 
-                }
-              }
-              break;
-            
-            case 3:
-              current_state = PARTY;
-              party_ticks = kilo_ticks;
-              break;
-          }
+        if(id1 == kilo_uid) {
+          parse_smart_arena_message(msg->data, 0);
+        } 
+        else if(id2 == kilo_uid) {
+          parse_smart_arena_message(msg->data, 1);
+        } 
+        else if (id3 == kilo_uid) {
+          parse_smart_arena_message(msg->data, 2);
         }
 
     }
@@ -316,8 +228,14 @@ void random_walk()
     /* compute turning time */
     turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
     straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+    
+    //set to true to test collision avoidance procedure
+    // collision_avoidance_test = true;
+    set_color(RGB(0,3,0));
+    
     return;
   }
+
 
 
   /* else keep on with normal random walk */
@@ -459,7 +377,13 @@ void loop() {
         }
 
         random_walk();
-        finite_state_machine();        
+        finite_state_machine(); 
+
+        if( collision_avoidance_test == true && kilo_ticks > last_motion_ticks + turning_ticks )
+        {
+          collision_avoidance_test = false;
+          set_color(RGB(0,0,0));
+        }
 }
 
 int main() {

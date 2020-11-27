@@ -144,8 +144,8 @@ void mykilobotenvironment::update() {
                          party_message.id = k;
                          party_message.type = PARTY;
                          party_message.data = 0;
-                         // qDebug() << "Party for kID: " << k << "type: "<< party_message.type;
                          lastSent[k] = this->time;
+                         qDebug() << "time:" << this->time << " ARK PARTY MESSAGE to " << k ;
                          emit transmitKiloState(party_message);
                      }
 
@@ -312,7 +312,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             message.type = INSIDE_AREA;   // sending inside to the kilobot
             message.data = timer_to_send; //seconds
 
-            // qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
+            qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }
@@ -349,7 +349,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 message.type = kilobots_states[k_id];
                 message.data = turning_in_msg;
 
-                // qDebug() << "ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data << "time:"<<this->time;
+                qDebug() << "time:"<<this->time<< " ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data;
                 lastSent[k_id] = this->time;
                 emit transmitKiloState(message);
             }
@@ -361,7 +361,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             message.id = k_id;
             message.type = RANDOM_WALK;   // sending OUTSIDE
 
-            // qDebug() << "ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type << "time:"<<this->time;
+            qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }

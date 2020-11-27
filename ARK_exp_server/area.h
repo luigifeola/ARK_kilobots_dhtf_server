@@ -89,8 +89,8 @@ public:
 
     bool isReady()
     {
-       return ( (this->type == HARD_TASK && kilobots_in_area.size() == HARD_TASK_COMPLETED) ||
-                (this->type == SOFT_TASK && kilobots_in_area.size() == SOFT_TASK_COMPLETED) );
+       return ( (this->type == HARD_TASK && kilobots_in_area.size() >= HARD_TASK_COMPLETED) ||
+                (this->type == SOFT_TASK && kilobots_in_area.size() >= SOFT_TASK_COMPLETED) );
     }
 
     // check if on top of the area there are the right amount of kilobots, so remove the area from the completable task
