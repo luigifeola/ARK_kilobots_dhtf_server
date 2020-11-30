@@ -440,7 +440,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 message.type = kilobots_states[k_id];
                 message.data = turning_in_msg;
 
-                qDebug() << "time:"<<this->time << " ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data ;
+                // qDebug() << "time:"<<this->time << " ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data ;
                 lastSent[k_id] = this->time;
                 emit transmitKiloState(message);
             }

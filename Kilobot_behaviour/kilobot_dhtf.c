@@ -231,7 +231,7 @@ void random_walk()
     
     //set to true to test collision avoidance procedure
     // collision_avoidance_test = true;
-    set_color(RGB(0,3,0));
+    // set_color(RGB(0,3,0));
     
     return;
   }
