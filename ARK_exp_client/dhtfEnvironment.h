@@ -21,6 +21,7 @@
 #include <QElapsedTimer>
 
 #include <limits>
+#include <bitset>
 
 #include <kilobotenvironment.h>
 #include "area.h"
@@ -46,6 +47,9 @@ class mykilobotenvironment : public KilobotEnvironment
 {
     Q_OBJECT
 public:
+    double debug_period = 0.5;
+    double lastDebug = 0.0;
+
     explicit mykilobotenvironment(QObject *parent = 0);
     void reset();
 
@@ -82,6 +86,9 @@ public slots:
 
 private:
     bool isTooclose(int kilobot_id);
+    double normAngle(double angle);
+    QVector2D VectorRotation2D (double angle, QVector2D vec);
+    QVector<int> proximity_sensor(QVector2D obstacle_direction, double kilo_rotation, int num_bit);
 };
 
 

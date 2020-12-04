@@ -17,6 +17,56 @@
 #include <QtMath>
 #include <QColor>
 
+namespace {
+    const QVector2D up_direction (0.0,-1.0);
+    const QVector2D down_direction (0.0,1.0);
+    const QVector2D left_direction (1.0,0.0);
+    const QVector2D right_direction (-1.0,0.0);
+    const double reachable_distance = (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER);
+    const int num_sectors = 8;
+}
+
+double mykilobotenvironment::normAngle(double angle){
+    while (angle > 180) angle = angle - 360;
+    while (angle < -180) angle = angle + 360;
+    return angle;
+}
+
+QVector2D mykilobotenvironment::VectorRotation2D (double angle, QVector2D vec){
+    // qDebug() << "2D Rotation";
+    QVector2D rotated_vector;
+    double kx = (cos(angle)* vec.x()) + (-1.0*sin(angle) * vec.y());
+    double ky = (sin(angle) * vec.x()) + (cos(angle) * vec.y());
+    rotated_vector.setX(kx);
+    rotated_vector.setY(ky);
+    return rotated_vector;
+}
+
+QVector<int> mykilobotenvironment::proximity_sensor(QVector2D obstacle_direction, double kilo_rotation, int num_bit){
+    double sector = M_PI_2 / (num_bit/2);
+    QVector<int> proximity;
+    // qDebug() << "kilo_ori" << qRadiansToDegrees(kilo_rotation);
+    for(int i=0; i<num_bit; i++)
+    {
+        QVector2D sector_dir_a = VectorRotation2D((kilo_rotation+M_PI_2 - i * sector), left_direction);
+        QVector2D sector_dir_b = VectorRotation2D((kilo_rotation+M_PI_2 - (i+1) * sector), left_direction);
+
+        // qDebug() << "wall-dir" << obstacle_direction;
+        // qDebug() << "a-dir" << sector_dir_a;
+        // qDebug() << "b-dir" << sector_dir_b;
+
+        if( QVector2D::dotProduct(obstacle_direction, sector_dir_a) >=0 ||
+            QVector2D::dotProduct(obstacle_direction, sector_dir_b) >=0    )
+        {
+            proximity.push_back(0);
+        }
+        else{
+            proximity.push_back(1);
+        }
+    }
+
+    return proximity;
+}
 
 mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment(parent) {
     // environment specifications
@@ -299,11 +349,14 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         /***********************WALL AVOIDANCE STUFF***********************/
         // store kb rotation toward the center if the kb is too close to the border
         // this is used to avoid that the kb gets stuck in the wall
-        uint8_t turning_in_msg = 0;  // 0 no turn, 1 pi/2, 2 pi, 3 3pi/2
+        uint8_t proximity_decimal = 0;  // 0 no turn, 1 pi/2, 2 pi, 3 3pi/2
 
-        QPoint center ((ARENA_CENTER*SCALING)+SHIFTX, (ARENA_CENTER*SCALING)+SHIFTY);
-        int distance_from_centre_x = this->kilobots_positions[k_id].x()-center.x();
-        int distance_from_centre_y = this->kilobots_positions[k_id].y()-center.y();
+        QPoint k_center ((ARENA_CENTER*SCALING)+SHIFTX, (ARENA_CENTER*SCALING)+SHIFTY);
+        // get position translated w.r.t. center of arena
+        QVector2D k_pos = QVector2D(this->kilobots_positions[k_id]);
+        QVector2D shifted_pos((k_pos.x() - k_center.x()), -1.0*(k_pos.y() - k_center.y()) );
+        // qDebug() << "pos:" << k_pos.x() << ' ' << k_pos.y() << "\tShifted:" << shifted_pos.x() << ' ' <<  shifted_pos.y();
+
 
 
         if( (kilobots_states[k_id] == INSIDE_AREA) && kilobots_colours[k_id] != Qt::red)
@@ -317,37 +370,77 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             emit transmitKiloState(message);
         }
 
-        else if( abs(distance_from_centre_x) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) ||
-                abs(distance_from_centre_y) > (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER) )
+        else if( abs(shifted_pos.x()) > reachable_distance ||
+                 abs(shifted_pos.y()) > reachable_distance )
         {
             // qDebug() << " COLLISION for kilobot " << k_id << " in position "<< kilobots_positions[k_id].x() << " " << kilobots_positions[k_id].y()
             //                                                             << " orientation " << qAtan2(QVector2D(kilobot_entity.getVelocity()).y(), QVector2D(kilobot_entity.getVelocity()).x());
             // get position translated w.r.t. center of arena
-            QVector2D pos = QVector2D(this->kilobots_positions[k_id]);
-            pos.setX(center.x() - pos.x());
-            pos.setY(center.y() - pos.y());
+
+
             // get orientation (from velocity)
-            QVector2D ori = QVector2D(kilobot_entity.getVelocity());
-            ori.setX(ori.x()*10);
-            ori.setY(ori.y()*10);
-            // use atan2 to get angle between two vectors
-            double angle = qAtan2(ori.y(), ori.x()) - qAtan2(pos.y(), pos.x());
+            QVector2D k_ori = QVector2D(kilobot_entity.getVelocity());
+            k_ori.setX(k_ori.x()*10);
+            k_ori.setY(k_ori.y()*10);
+            // qDebug() << "Orientation: " << normAngle( qRadiansToDegrees(qAtan2(-k_ori.y(), k_ori.x())) );
 
-            // double angle = qAtan2(-kilobot_entity.getVelocity().y(), kilobot_entity.getVelocity().x()) - qAtan2(pos.y(), pos.x());
+            double k_rotation = qAtan2(-k_ori.y(), k_ori.x());
+            // double angle = k_rotation - qAtan2(shifted_pos.y(), shifted_pos.x());
+            // get angle wrt center position
+            /*qDebug() << normAngle( qRadiansToDegrees(qAtan2(-k_ori.y(), k_ori.x())) )
+                     << normAngle( qRadiansToDegrees(qAtan2(shifted_pos.y(), shifted_pos.x())) ) ;
+                     << normAngle( qRadiansToDegrees(angle) );*/
 
-            if(angle > M_PI*3/4 || angle < -M_PI*3/4) {
-                 turning_in_msg = 2;
-            } else if(angle < -M_PI/2) {
-                turning_in_msg = 3;
-            } else if(angle > M_PI/2){
-                turning_in_msg = 1;
+            // qDebug() << "Pos:" << k_pos << "\tRotation" << k_rotation;
+            QVector<int> proximity;
+            // TODO : Understand here what you need
+            if(shifted_pos.x() > reachable_distance){
+                // qDebug()<< "RIGHT";
+                proximity = proximity_sensor(right_direction, k_rotation, num_sectors);
+            }
+            else if(shifted_pos.x() < -1.0*reachable_distance){
+                // qDebug()<< "LEFT";
+                proximity = proximity_sensor(left_direction, k_rotation, num_sectors);
             }
 
-            if( turning_in_msg!= 0 )
+            if(shifted_pos.y() > reachable_distance){
+                // qDebug()<< "UP";
+                if(proximity.isEmpty())
+                    proximity = proximity_sensor(up_direction, k_rotation, num_sectors);
+                else{
+                    QVector<int> prox = proximity_sensor(up_direction, k_rotation, num_sectors);
+                    QVector<int> elementwiseOr;
+                    elementwiseOr.reserve(prox.size());
+                    std::transform( proximity.begin(), proximity.end(), prox.begin(),
+                            std::back_inserter( elementwiseOr ), std::logical_or<>() );
+
+                    proximity = elementwiseOr;
+                }
+            }
+            else if(shifted_pos.y() < -1.0*reachable_distance){
+                // qDebug()<< "DOWN";
+                if(proximity.isEmpty())
+                    proximity = proximity_sensor(down_direction, k_rotation, num_sectors);
+                else{
+                    QVector<int> prox = proximity_sensor(down_direction, k_rotation, num_sectors);
+                    QVector<int> elementwiseOr;
+                    elementwiseOr.reserve(prox.size());
+                    std::transform( proximity.begin(), proximity.end(), prox.begin(),
+                            std::back_inserter( elementwiseOr ), std::logical_or<>() );
+
+                    proximity = elementwiseOr;
+                }
+            }
+
+            proximity_decimal = std::accumulate(proximity.begin(), proximity.end(), 0, [](int x, int y) { return (x << 1) + y; });
+            qDebug() <<proximity << "\tDec: " << proximity_decimal;
+
+
+            if( proximity_decimal!= 0 )
             {
                 message.id = k_id;
                 message.type = kilobots_states[k_id];
-                message.data = turning_in_msg;
+                message.data = proximity_decimal;
 
                 // qDebug() << "time:"<<this->time<< " ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data;
                 lastSent[k_id] = this->time;
@@ -360,6 +453,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         {
             message.id = k_id;
             message.type = RANDOM_WALK;   // sending OUTSIDE
+            message.data = 0;
 
             // qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;

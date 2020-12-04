@@ -376,7 +376,7 @@ void mykilobotexperiment::run() {
         }
     }
 
-    else if ( (qRound(this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f  ) {
+    else if ( logExp && ((qRound(this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f)  ) {
         last_ARK_message = this->time;
         sendToServer(QString("Missing initialisation"));
     }
@@ -405,7 +405,7 @@ void mykilobotexperiment::run() {
     }
 
     // save LOG files and images for videos
-    if( qRound((this->time - last_log)*10.0f) >= log_period*10.0f)
+    if( logExp && (qRound((this->time - last_log)*10.0f) >= log_period*10.0f))
     {
         qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
         qDebug() << "LOGs saving at " << this->time*10;
@@ -580,29 +580,35 @@ void mykilobotexperiment::plotEnvironment() {
     // drawCircle(QPointF(750,750), 735, QColor(Qt::yellow), 25, "center", true);
 
     // arena scaled
-    std::vector<cv::Point> pos0 {Point(SHIFTX,SHIFTY), Point(SHIFTX,1000+SHIFTY)};
+    std::vector<cv::Point> pos0 {Point(SHIFTX,SHIFTY), Point(SHIFTX,(ARENA_SIZE*SCALING)+SHIFTY)};
     drawLine(pos0,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos1 {Point(SHIFTX,SHIFTY), Point(1000+SHIFTX,SHIFTY)};
+    std::vector<cv::Point> pos1 {Point(SHIFTX,SHIFTY), Point((ARENA_SIZE*SCALING)+SHIFTX,SHIFTY)};
     drawLine(pos1,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos2 {Point(SHIFTX,1000+SHIFTY), Point(1000+SHIFTX,1000+SHIFTY)};
+    std::vector<cv::Point> pos2 {Point(SHIFTX,1000+SHIFTY), Point((ARENA_SIZE*SCALING)+SHIFTX,1000+SHIFTY)};
     drawLine(pos2,Qt::blue, 5,"",false);
-    std::vector<cv::Point> pos3 {Point(1000+SHIFTX,SHIFTY), Point(1000+SHIFTX,1000+SHIFTY)};
+    std::vector<cv::Point> pos3 {Point((ARENA_SIZE*SCALING)+SHIFTX,SHIFTY), Point((ARENA_SIZE*SCALING)+SHIFTX,1000+SHIFTY)};
     drawLine(pos3,Qt::blue, 5,"",false);
 
 
     // arena - 2*Kilo_diameter
-    std::vector<cv::Point> bd0 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER)};
+    std::vector<cv::Point> bd0 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER)};
     drawLine(bd0,Qt::yellow, 3,"",false);
-    std::vector<cv::Point> bd1 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER)};
+    std::vector<cv::Point> bd1 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER)};
     drawLine(bd1,Qt::yellow, 3,"",false);
-    std::vector<cv::Point> bd2 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER)};
+    std::vector<cv::Point> bd2 {Point(SHIFTX+2*KILO_DIAMETER,SHIFTY+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER), Point(SHIFTX+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER,SHIFTY+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER)};
     drawLine(bd2,Qt::yellow, 3,"",false);
-    std::vector<cv::Point> bd3 {Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+1000-2*KILO_DIAMETER,SHIFTY+1000-2*KILO_DIAMETER)};
+    std::vector<cv::Point> bd3 {Point(SHIFTX+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER,SHIFTY+2*KILO_DIAMETER), Point(SHIFTX+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER,SHIFTY+(ARENA_SIZE*SCALING)-2*KILO_DIAMETER)};
     drawLine(bd3,Qt::yellow, 3,"",false);
 
     // Draw some useful position : center + 4 corners
-    // drawCircle(QPoint(ARENA_CENTER,ARENA_CENTER), 30.0, QColor(Qt::black), 15, "", false);
+    QPoint k_center ((ARENA_CENTER*SCALING)+SHIFTX, (ARENA_CENTER*SCALING)+SHIFTY);
+    drawCircle(QPoint(k_center.x(),k_center.y()), 10.0, QColor(Qt::black), 10, "", false);
 
+    // x and y axis
+    std::vector<cv::Point> xAx {Point(SHIFTX, (ARENA_SIZE*SCALING/2.0)+SHIFTY), Point(SHIFTX+(ARENA_SIZE*SCALING), (ARENA_SIZE*SCALING/2.0)+SHIFTY)};
+    drawLine(xAx,Qt::black, 3,"",false);
+    std::vector<cv::Point> yAx {Point((ARENA_SIZE*SCALING/2.0)+SHIFTX, SHIFTY), Point((ARENA_SIZE*SCALING/2.0)+SHIFTX, SHIFTY+(ARENA_SIZE*SCALING))};
+    drawLine(yAx,Qt::black, 3,"",false);
     // drawCircle(QPoint(0,0), 30.0, QColor(Qt::yellow), 15, "", false);
     // drawCircle(QPoint(0,2.0*ARENA_CENTER), 30.0, QColor(Qt::yellow), 15, "", false);
     // drawCircle(QPoint(2.0*ARENA_CENTER,0), 30.0, QColor(Qt::yellow), 15, "", false);

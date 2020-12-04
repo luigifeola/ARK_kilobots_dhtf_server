@@ -226,7 +226,7 @@ void mykilobotenvironment::update() {
 
 
 // generate virtual sensors reading and send it to the kbs (same as for ARGOS)
-void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
+void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {   
     // qDebug() << QString("In updateVirtualSensor");
     // update local arrays
     kilobot_id k_id = kilobot_entity.getID();
