@@ -5,6 +5,7 @@
 #include "distribution_functions.c"
 
 #define COLLISION_BITS 8
+#define SECTORS_IN_COLLISION 4
 
 typedef enum {  // Enum for different motion types
     TURN_LEFT = 1,
@@ -110,8 +111,7 @@ void set_motion(motion_t new_motion_type) {
       break;
     case STOP:
     default:
-      set_motors(0,0);
-      
+      set_motors(0,0);  
     }
     current_motion_type = new_motion_type;
   }
@@ -136,8 +136,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
         // get rotation toward the center (if far from center)
         // avoid colliding with the wall
         proximity_sensor = sa_payload;
-        wall_avoidance_start = true;
-        
+        wall_avoidance_start = true;       
       }
       break;
 
@@ -308,7 +307,7 @@ void wall_avoidance_procedure(uint8_t sensor_readings)
   left_side = (sensor_readings >> (COLLISION_BITS/2)) & sector_base;
 
   uint8_t count_ones = countOnes(sensor_readings);
-  if(count_ones > 2)
+  if(count_ones > SECTORS_IN_COLLISION)
   {
     if(right_side < left_side)
     {

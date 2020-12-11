@@ -403,7 +403,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             message.type = INSIDE_AREA;   // sending inside to the kilobot
             message.data = timer_to_send; //seconds
 
-            qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type ;
+            // qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type ;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }
@@ -452,7 +452,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             message.id = k_id;
             message.type = RANDOM_WALK;   // sending OUTSIDE
 
-            qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
+            // qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
         }

@@ -46,8 +46,9 @@ mykilobotexperiment::mykilobotexperiment() {
     this->serviceInterval = 100; // timestep expressed in ms
 
 
+    client = new ClientStuff("150.146.65.45", 7002); //other CNR pc
     // client = new ClientStuff("127.0.0.1", 7001); //local
-    client = new ClientStuff("143.167.48.37", 7001); //sheffield
+    // client = new ClientStuff("143.167.48.37", 7001); //sheffield
     //    setStatus(client->getStatus());
     connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
     connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
