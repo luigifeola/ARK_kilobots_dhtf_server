@@ -5,7 +5,7 @@
 #include "distribution_functions.c"
 
 #define COLLISION_BITS 8
-#define SECTORS_IN_COLLISION 4
+#define SECTORS_IN_COLLISION 2
 
 typedef enum {  // Enum for different motion types
     TURN_LEFT = 1,

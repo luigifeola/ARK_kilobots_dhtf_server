@@ -43,7 +43,7 @@ QVector2D mykilobotenvironment::VectorRotation2D (double angle, QVector2D vec){
 }
 
 QVector<int> mykilobotenvironment::proximity_sensor(QVector2D obstacle_direction, double kilo_rotation, int num_bit){
-    double sector = M_PI_2 / (num_bit/2);
+    double sector = M_PI_2 / (num_bit/2.0);
     QVector<int> proximity;
     // qDebug() << "kilo_ori" << qRadiansToDegrees(kilo_rotation);
     for(int i=0; i<num_bit; i++)

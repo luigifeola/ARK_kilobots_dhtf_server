@@ -21,6 +21,7 @@
 #include <QElapsedTimer>
 
 #include <limits>
+#include <bitset>
 
 #include <kilobotenvironment.h>
 #include "area.h"
@@ -83,6 +84,9 @@ public slots:
 private:
     bool isTooclose(int kilobot_id);
     void initialiseEnvironment(QVector<int> activated_areas, QVector<uint> hard_tasks, QVector<uint> hard_tasks_client);
+    double normAngle(double angle);
+    QVector2D VectorRotation2D (double angle, QVector2D vec);
+    QVector<int> proximity_sensor(QVector2D obstacle_direction, double kilo_rotation, int num_bit);
 };
 
 
