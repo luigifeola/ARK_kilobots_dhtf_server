@@ -46,7 +46,7 @@ mykilobotexperiment::mykilobotexperiment() {
     this->serviceInterval = 100; // timestep expressed in ms
 
 
-    client = new ClientStuff("150.146.65.45", 7002); //other CNR pc
+    client = new ClientStuff("150.146.65.45", 7001); //other CNR workstation
     // client = new ClientStuff("127.0.0.1", 7001); //local
     // client = new ClientStuff("143.167.48.37", 7001); //sheffield
     //    setStatus(client->getStatus());
@@ -57,40 +57,26 @@ mykilobotexperiment::mykilobotexperiment() {
 
 void mykilobotexperiment::receivedSomething(QString msg)
 {
-    // qDebug() << QString("**************************New message: %1").arg(msg);
+    qDebug() << QString("Receiving: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
+    if(msg.startsWith("I"))
+        qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
 }
 
 void mykilobotexperiment::on_pushButton_send_clicked()
 {
-    // qDebug() << "LineEdit content: " << bufferLineEdit->text();
-
-    QByteArray arrBlock;
-    QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    // out << quint16(0) << QString("Test send string");
-
-    out << quint16(0) << bufferLineEdit->text();
-
-    out.device()->seek(0);
-    out << quint16(arrBlock.size() - sizeof(quint16));
-
-    client->tcpSocket->write(arrBlock);
+    QString str1 = bufferLineEdit->text();
+    QByteArray ba = str1.toLocal8Bit();
+    const char *c_str2 = ba.data();
+    client->tcpSocket->write(c_str2);
 }
 
 void mykilobotexperiment::sendToServer(QString msg)
 {
-     qDebug() << "SENDING: " << msg;
-
-    QByteArray arrBlock;
-    QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    // out << quint16(0) << QString("Test send string");
-
-    out << quint16(0) << msg;
-
-    out.device()->seek(0);
-    out << quint16(arrBlock.size() - sizeof(quint16));
-
-    client->tcpSocket->write(arrBlock);
+    qDebug() << QString("Sending: %1").arg(msg);
+    QByteArray ba = msg.toLocal8Bit();
+    const char *c_str2 = ba.data();
+    client->tcpSocket->write(c_str2);
 }
 
 void mykilobotexperiment::gotError(QAbstractSocket::SocketError err)
@@ -408,8 +394,8 @@ void mykilobotexperiment::run() {
     // save LOG files and images for videos
     if( logExp && (qRound((this->time - last_log)*10.0f) >= log_period*10.0f))
     {
-        qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
-        qDebug() << "LOGs saving at " << this->time*10;
+        // qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
+        // qDebug() << "LOGs saving at " << this->time*10;
         last_log = this->time;
         if(saveImages) {
             // qDebug() << "Saving Image";

@@ -26,29 +26,22 @@ void ServerStuff::newConnection()
 void ServerStuff::readClient()
 {
     QTcpSocket *clientSocket = (QTcpSocket*)sender();
+    quint64 bufferSize = 2048;
+    char buffer[bufferSize];
+    quint64 dataRead = 0;
 
-    QDataStream in(clientSocket);
-    //in.setVersion(QDataStream::Qt_5_10);
-    for (;;)
-    {
-        if (!m_nNextBlockSize) {
-                if (clientSocket->bytesAvailable() < sizeof(quint16)) { break; }
-            in >> m_nNextBlockSize;
-        }
+    dataRead = clientSocket->read(buffer, bufferSize);
+    buffer[dataRead] = 0;
 
-        if (clientSocket->bytesAvailable() < m_nNextBlockSize) { break; }
-        QString str;
-        in >> str;
+    // qDebug() << "[WEB] Incoming data[" << dataRead << "]: " << buffer;
 
-        emit gotNewMesssage(str);
 
-        m_nNextBlockSize = 0;
+    emit gotNewMesssage(buffer);
 
-        // if (sendToClient(clientSocket, QString("Reply: received [%1]").arg(str)) == -1)
-        // {
-        //     qDebug() << "Some error occured";
-        // }
-    }
+//    if (sendToClient(clientSocket, QString("Reply: received [%1]").arg(buffer)) == -1)
+//    {
+//        qDebug() << "Some error occured";
+//    }
 }
 
 void ServerStuff::gotDisconnection()
@@ -59,14 +52,10 @@ void ServerStuff::gotDisconnection()
 
 qint64 ServerStuff::sendToClient(QTcpSocket* socket, const QString& str)
 {
-    QByteArray arrBlock;
-    QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    //out.setVersion(QDataStream::Qt_5_10);
-    //out << quint16(0) << QTime::currentTime() << str;
-    out << quint16(0) << str;
+    //QString str1 = ui->lineEdit_message->text();
+    QByteArray ba = str.toLocal8Bit();
+    const char *c_str2 = ba.data();
+    //client->tcpSocket->write(c_str2);
 
-    out.device()->seek(0);
-    out << quint16(arrBlock.size() - sizeof(quint16));
-
-    return socket->write(arrBlock);
+    return socket->write(c_str2);
 }

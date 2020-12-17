@@ -30,7 +30,7 @@
 // #define SHIFTX 0 //sheffield
 // #define SHIFTY 1000 //sheffield
 #define SHIFTX 500 //cnr
-#define SHIFTY 0 //cnr
+#define SHIFTY 500 //cnr
 #define ARENA_CENTER 1000
 #define ARENA_SIZE 2000
 #define KILO_DIAMETER 66 //cnr

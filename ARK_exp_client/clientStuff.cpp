@@ -48,29 +48,15 @@ bool ClientStuff::getStatus() {return status;}
 
 void ClientStuff::readyRead()
 {
-    QDataStream in(tcpSocket);
-    //in.setVersion(QDataStream::Qt_5_10);
-    for (;;)
-    {
-        if (!m_nNextBlockSize)
-        {
-            if (tcpSocket->bytesAvailable() < sizeof(quint16)) { break; }
-            in >> m_nNextBlockSize;
-        }
+    quint64 bufferSize = 2048;
+    char buffer[bufferSize];
+    quint64 dataRead = 0;
 
-        if (tcpSocket->bytesAvailable() < m_nNextBlockSize) { break; }
+    dataRead = tcpSocket->read(buffer, bufferSize);
+    buffer[dataRead] = 0;
 
-        QString str; in >> str;
-
-        if (str == "0")
-        {
-            str = "Connection closed";
-            closeConnection();
-        }
-
-        emit hasReadSome(str);
-        m_nNextBlockSize = 0;
-    }
+    // qDebug() << "[WEB] Incoming data[" << dataRead << "]: " << buffer;
+    emit hasReadSome(buffer);
 }
 
 //void ClientStuff::gotDisconnection()

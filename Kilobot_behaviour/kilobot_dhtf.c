@@ -262,7 +262,7 @@ void random_walk()
 /*-------------------------------------------------------------------*/
 void setup() {
     /* Initialise LED and motors */
-    set_color(RGB(0,0,0));
+    set_color(RGB(0,3,0));
     set_motors(0,0);
 
     /* Initialise random seed */
@@ -344,7 +344,7 @@ void wall_avoidance_procedure(uint8_t sensor_readings)
   }
   // else
   // {
-  //   set_color(RGB(0,0,0));
+  //   set_color(RGB(0,3,0));
   // }
   
 }
@@ -372,7 +372,7 @@ void finite_state_machine(){
                 
                 internal_timeout = 0;
                 current_state = RANDOM_WALKING;
-                set_color(RGB(0,0,0));
+                set_color(RGB(0,3,0));
             }
             /* Timeout condition */
             if(kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
@@ -389,7 +389,7 @@ void finite_state_machine(){
         case LEAVING : {
             if(location == OUTSIDE){
                 current_state = RANDOM_WALKING;
-                set_color(RGB(0,0,0));
+                set_color(RGB(0,3,0));
             }
             break;
         }
@@ -402,7 +402,7 @@ void finite_state_machine(){
           if(kilo_ticks > party_ticks + 10 * to_sec)
           {
             set_motion(FORWARD);
-            set_color(RGB(0,0,0));
+            set_color(RGB(0,3,0));
             current_state = RANDOM_WALKING;
           }
           break;  
@@ -428,7 +428,7 @@ void loop() {
           wall_avoidance_start = false;
         }
         else{
-          // set_color(RGB(0,0,0));
+          // set_color(RGB(0,3,0));
           random_walk();
           finite_state_machine(); 
         }
@@ -438,7 +438,7 @@ void loop() {
         // if( collision_avoidance_test == true && kilo_ticks > last_motion_ticks + turning_ticks )
         // {
         //   collision_avoidance_test = false;
-        //   set_color(RGB(0,0,0));
+        //   set_color(RGB(0,3,0));
         // }
 }
 
