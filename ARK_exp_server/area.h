@@ -98,8 +98,8 @@ public:
     {
         if(ready)
         {
-            if( (this->type == HARD_TASK && kilobots_in_area.size() == HARD_TASK_COMPLETED) ||
-                (this->type == SOFT_TASK && kilobots_in_area.size() == SOFT_TASK_COMPLETED))
+            if( (this->type == HARD_TASK && kilobots_in_area.size() >= HARD_TASK_COMPLETED) ||
+                (this->type == SOFT_TASK && kilobots_in_area.size() >= SOFT_TASK_COMPLETED))
             {
                 this->completed_time = kTime;
                 *a_copy = *this;
