@@ -390,22 +390,16 @@ void mykilobotexperiment::run() {
 
     // Update Environment
     dhtfEnvironment.time = (float)time;
-
-
-    //here you should send a message
-//    qDebug() << "***TEST***";
-//    qDebug() << "std::fmod(this->time,5.0)" << std::fmod(this->time,5.0);
-
-//    if(std::fmod(this->time,2.0) > 1.9)// if(true)
-//    {
-//        qDebug()<< "std::fmod(this->time,2.0) > 1.9";
-//    }
-//    else
-//        qDebug()<< "std::fmod = " << std::fmod(this->time,2.0);
+     qDebug() << dhtfEnvironment.receive_buffer;
 
     if(dhtfEnvironment.receive_buffer.startsWith("R")){
         dhtfEnvironment.initialised_client = true;
-        qDebug() << "************************ \n ************************ \n ********INITIALIZED*** \n ************************ \N ************************";
+        qDebug() << "************************************";
+        qDebug() << "*********INITIALISED ***************";
+        qDebug() << "************************************";
+        qDebug() << "************************************";
+        qDebug() << "************************************";
+        qDebug() << "************************************";
     }
     else if(dhtfEnvironment.initialised_client == false || dhtfEnvironment.receive_buffer.startsWith("M"))
     {
@@ -449,8 +443,9 @@ void mykilobotexperiment::run() {
     // save LOG files and images for videos
     if( qRound((this->time - last_log)*10.0f) >= log_period*10.0f)
     {
-        qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
-        qDebug() << "LOGs saving at " << this->time*10;
+        //UNCOMMENT AT RUN EXPERIMENTS
+        //qDebug() << "Log time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
+        //qDebug() << "LOGs saving at " << this->time*10;
         last_log = this->time;
         if(saveImages) {
             // qDebug() << "Saving Image";
