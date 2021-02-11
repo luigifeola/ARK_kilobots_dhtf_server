@@ -118,7 +118,7 @@ void mykilobotexperiment::smbDisconnectedFromServer()
 
 void mykilobotexperiment::gotNewMesssage(QString msg)
 {
-    qDebug() << "Received a new message from the client: " << msg << " time:" << this->time;
+    qDebug() << "Received from the client: " << msg << " time:" << this->time;
     dhtfEnvironment.receive_buffer = msg;
 
 //    for (QTcpSocket* clientsSocket : server->getClients())
@@ -143,7 +143,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToClient(QString msg)
 {
-    qDebug() << "Sending to client the message: " << msg << " time:" << this->time;
+    qDebug() << "Sending to client: " << msg << " time:" << this->time;
     for (QTcpSocket* clientsSocket : server->getClients())
     {
         if (server->sendToClient(clientsSocket, msg) == -1)

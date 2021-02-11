@@ -25,8 +25,8 @@
 #include <QDir>
 
 #define STOP_AFTER 1800
-//#define IP_ADDR "127.0.0.1" //local
-#define IP_ADDR "143.167.48.37" //sheffield
+#define IP_ADDR "127.0.0.1" //local
+//#define IP_ADDR "143.167.48.37" //sheffield
 //#define IP_ADDR "150.146.65.45" //other CNR workstation
 #define PORT 7001
 
@@ -59,7 +59,7 @@ mykilobotexperiment::mykilobotexperiment() {
 
 void mykilobotexperiment::receivedSomething(QString msg)
 {
-    qDebug() << QString("Receiving: %1").arg(msg);
+    qDebug() << QString("Receiving from server: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
     if(msg.startsWith("I"))
         qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
@@ -75,7 +75,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToServer(QString msg)
 {
-    qDebug() << QString("Sending: %1").arg(msg);
+    qDebug() << QString("Sending to server: %1").arg(msg);
     QByteArray ba = msg.toLocal8Bit();
     const char *c_str2 = ba.data();
     client->tcpSocket->write(c_str2);
