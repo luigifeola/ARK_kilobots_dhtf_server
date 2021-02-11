@@ -25,6 +25,10 @@
 #include <QDir>
 
 #define STOP_AFTER 1800
+//#define IP_ADDR "127.0.0.1" //local
+#define IP_ADDR "143.167.48.37" //sheffield
+//#define IP_ADDR "150.146.65.45" //other CNR workstation
+#define PORT 7001
 
 // return pointer to interface!
 // mykilobotexperiment can and should be completely hidden from the application
@@ -46,9 +50,7 @@ mykilobotexperiment::mykilobotexperiment() {
     this->serviceInterval = 100; // timestep expressed in ms
 
 
-    client = new ClientStuff("150.146.65.45", 7001); //other CNR workstation
-    // client = new ClientStuff("127.0.0.1", 7001); //local
-    // client = new ClientStuff("143.167.48.37", 7001); //sheffield
+    client = new ClientStuff(IP_ADDR, 7001); //local
     //    setStatus(client->getStatus());
     connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
     connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
@@ -205,7 +207,8 @@ void mykilobotexperiment::initialise(bool isResume) {
                     << "creation" << '\t'
                     << "conclusion" << '\t'
                     <<"type" << '\t'
-                    <<"kilo_on_top" << '\n';
+                    <<"kilo_on_top" << '\t'
+                    <<"kilo_vector" << '\n';
         } else {
             qDebug() << "ERROR opening file "<< log_filename;
         }
@@ -447,11 +450,15 @@ void mykilobotexperiment::run() {
                        << dhtfEnvironment.completed_area->creation_time << '\t'
                        << dhtfEnvironment.completed_area->completed_time << '\t'
                        << int(dhtfEnvironment.completed_area->type) << '\t'
-                       << dhtfEnvironment.completed_area->kilobots_in_area.size();
+                       << dhtfEnvironment.completed_area->kilobots_in_area.size()<< '\t';
 
             for(int i=0; i<dhtfEnvironment.completed_area->kilobots_in_area.size(); i++)
             {
-                log_stream_areas << '\t' <<dhtfEnvironment.completed_area->kilobots_in_area.at(i);
+                log_stream_areas << dhtfEnvironment.completed_area->kilobots_in_area.at(i);
+                if(i< dhtfEnvironment.completed_area->kilobots_in_area.size() - 1)
+                {
+                    log_stream_areas <<",";
+                }
             }
 
             log_stream_areas << endl;

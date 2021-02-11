@@ -41,6 +41,12 @@ motion_t current_motion_type = STOP;            // Current motion type
 
 action_t current_state = RANDOM_WALKING;        // Current state
 
+/* RTID variables */
+bool runtime_identification=false;
+uint32_t backup_kiloticks;
+uint16_t backup_state = RANDOM_WALKING;
+motion_t backup_motion=STOP;
+
 /* SALAH---------------------------------------------- */
 // uint32_t last_turn_ticks = 0;                   // Counters for motion, turning and random_walk
 // uint32_t turn_ticks = 60;
@@ -98,22 +104,34 @@ void set_motion(motion_t new_motion_type) {
   {
     switch( new_motion_type ) {
     case FORWARD:
-      spinup_motors();
-      set_motors(kilo_straight_left,kilo_straight_right);
+      if(!runtime_identification)
+      {
+        spinup_motors();
+        set_motors(kilo_straight_left,kilo_straight_right);
+      }
       break;
     case TURN_LEFT:
-      spinup_motors();
-      set_motors(kilo_turn_left,0);
+      if(!runtime_identification)
+      {
+        spinup_motors();
+        set_motors(kilo_turn_left,0);
+      }
       break;
     case TURN_RIGHT:
-      spinup_motors();
-      set_motors(0,kilo_turn_right);
+      if(!runtime_identification)
+      {
+        spinup_motors();
+        set_motors(0,kilo_turn_right);
+      }
       break;
     case STOP:
     default:
       set_motors(0,0);
     }
     current_motion_type = new_motion_type;
+    if(current_motion_type!=STOP){
+      backup_motion=current_motion_type;
+    }
   }
 }
 
@@ -191,7 +209,8 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
     {
       start = 1;
     }
-    /* For assign id message */
+
+    /* ARK ID identification */
     else if (msg->type == 120) 
     {
         int id = (msg->data[0] << 8) | msg->data[1];
@@ -199,6 +218,45 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
             set_color(RGB(0,0,3));
         } else {
             set_color(RGB(3,0,0));
+        }
+    }
+
+	  /** ARK Runtime identification **/
+    else if (msg->type == 119) {
+        // runtime identification
+        int id = (msg->data[0] << 8) | msg->data[1];
+        if (id >= 0){ // runtime identification ongoing
+            set_motion(STOP);
+            runtime_identification = true;
+            if (id == kilo_uid) {
+                set_color(RGB(0,0,3));
+            } else {
+                set_color(RGB(3,0,0));
+            }
+        } else { // runtime identification ended
+            kilo_ticks=backup_kiloticks;
+            //set_color(current_LED_color);
+            runtime_identification = false;
+            set_motion(backup_motion);
+            current_state = backup_state;
+            switch (current_state)
+            {
+            case RANDOM_WALKING:
+              set_color(RGB(0,3,0));
+              break;
+            case WAITING:
+              set_color(RGB(0,0,3));
+              break;
+            case LEAVING:
+              set_color(RGB(3,0,0));
+              break;
+            case PARTY:
+              set_color(RGB(3,0,3));
+              break;
+            default:
+              set_color(RGB(0,3,0));
+              break;
+            }
         }
     }
 }
@@ -361,7 +419,7 @@ void finite_state_machine(){
 
                 last_waiting_ticks = kilo_ticks;
                 
-                set_color(RGB(3,0,0));
+                set_color(RGB(0,0,3));
                 current_state = WAITING;
             }
             break;
@@ -382,7 +440,7 @@ void finite_state_machine(){
                 set_motion(FORWARD);
 
                 current_state = LEAVING;
-                set_color(RGB(0,0,3));
+                set_color(RGB(3,0,0));
             }
             break;
         }
@@ -408,6 +466,10 @@ void finite_state_machine(){
           break;  
         }
     }
+    if(!runtime_identification)
+    {
+      backup_state = current_state;
+    }
 }
 
 /*-------------------------------------------------------------------*/
@@ -422,15 +484,21 @@ void loop() {
           start = 2;
         }
 
-        if(wall_avoidance_start){
-          wall_avoidance_procedure(proximity_sensor);
-          proximity_sensor = 0;
-          wall_avoidance_start = false;
-        }
-        else{
-          // set_color(RGB(0,3,0));
-          random_walk();
-          finite_state_machine(); 
+        if(!runtime_identification)
+        {
+          backup_kiloticks=kilo_ticks; // which we restore in after runtime_identification
+
+          if(wall_avoidance_start){
+            wall_avoidance_procedure(proximity_sensor);
+            proximity_sensor = 0;
+            wall_avoidance_start = false;
+          }
+          else{
+            // set_color(RGB(0,3,0));
+            random_walk();
+            finite_state_machine(); 
+          }
+
         }
         
         

@@ -88,8 +88,7 @@ void mykilobotenvironment::initialiseAreas()
 {
     double white_space = SCALING * 2 * KILO_DIAMETER;
     double radius = (((2.0*ARENA_CENTER*SCALING - white_space)/ 4.0) - white_space)/2.0;
-    // QPointF areasOffset(0,1000);    //sheffield offset
-    QPointF areasOffset(SHIFTX,SHIFTY);    //cnr offset
+    QPointF areasOffset(SHIFTX,SHIFTY);
 
     receive_buffer.remove(0,1); // remove 1 char from position 0 (i.e. "I")
     qDebug() << "initialise buffer " << receive_buffer;
@@ -239,11 +238,11 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     // update kilobot led colour (indicates the internal state of the kb)
     lightColour kb_colour = kilobot_entity.getLedColour();
     if(kb_colour == lightColour::RED){
-        this->kilobots_colours[k_id] = Qt::red;     // kilobot in WAITING
+        this->kilobots_colours[k_id] = Qt::red;     // kilobot in LEAVING
         // qDebug() << "ReeEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else if(kb_colour == lightColour::BLUE){
-        this->kilobots_colours[k_id] = Qt::blue;    // kilobot in LEAVING
+        this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
         // qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else
@@ -274,7 +273,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         if(a->isInside(kilobot_entity.getPosition()))
         {
 
-            if(kilobots_colours[k_id] == Qt::blue || kilobots_states[k_id] == LEAVING)
+            if(kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == LEAVING)
             {
                 kilobots_states[k_id] = LEAVING;
                 a->kilobots_in_area.erase(std::remove(a->kilobots_in_area.begin(), a->kilobots_in_area.end(), k_id),
@@ -364,7 +363,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
 
 
-        if( (kilobots_states[k_id] == INSIDE_AREA) && kilobots_colours[k_id] != Qt::red)
+        if( (kilobots_states[k_id] == INSIDE_AREA) /*&& kilobots_colours[k_id] != Qt::blue*/)
         {
             message.id = k_id;
             message.type = INSIDE_AREA;   // sending inside to the kilobot
@@ -454,7 +453,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
         }
 
-        else if(kilobots_states[k_id] == RANDOM_WALK && kilobots_colours[k_id] != Qt::black)
+        else if(kilobots_states[k_id] == RANDOM_WALK &&
+               (kilobots_colours[k_id] == Qt::blue || kilobots_colours[k_id] == Qt::red))
         {
             message.id = k_id;
             message.type = RANDOM_WALK;   // sending OUTSIDE
