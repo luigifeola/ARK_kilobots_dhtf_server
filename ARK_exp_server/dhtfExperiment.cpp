@@ -390,7 +390,6 @@ void mykilobotexperiment::run() {
 
     // Update Environment
     dhtfEnvironment.time = (float)time;
-     qDebug() << dhtfEnvironment.receive_buffer;
 
     if(dhtfEnvironment.receive_buffer.startsWith("R")){
         dhtfEnvironment.initialised_client = true;

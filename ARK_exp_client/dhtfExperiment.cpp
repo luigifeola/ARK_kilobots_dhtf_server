@@ -58,7 +58,7 @@ mykilobotexperiment::mykilobotexperiment() {
 
 void mykilobotexperiment::receivedSomething(QString msg)
 {
-    qDebug() << QString("Receiving from server: %1").arg(msg);
+    //qDebug() << QString("Received from server: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
     if(msg.startsWith("I"))
         qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
@@ -330,11 +330,10 @@ void mykilobotexperiment::run() {
 
     // Update Environment
     dhtfEnvironment.time = (float)time;
-    qDebug() << "Buffer is: "<<dhtfEnvironment.receive_buffer << " " << time;
 
     if( dhtfEnvironment.initialised == true || dhtfEnvironment.receive_buffer.startsWith("I") )
     {
-        if(dhtfEnvironment.receive_buffer.startsWith("I"))
+        if(dhtfEnvironment.receive_buffer.startsWith("I") && dhtfEnvironment.initialised == false)
         {
             sendToServer("Received initialisation");
         }
