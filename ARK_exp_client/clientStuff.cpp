@@ -30,7 +30,6 @@ void ClientStuff::connect2host()
 
 void ClientStuff::connectionTimeout()
 {
-    //qDebug() << tcpSocket->state();
     if(tcpSocket->state() == QAbstractSocket::ConnectingState)
     {
         tcpSocket->abort();
@@ -55,7 +54,6 @@ void ClientStuff::readyRead()
     dataRead = tcpSocket->read(buffer, bufferSize);
     buffer[dataRead] = 0;
 
-    // qDebug() << "[WEB] Incoming data[" << dataRead << "]: " << buffer;
     emit hasReadSome(buffer);
 }
 
@@ -69,7 +67,6 @@ void ClientStuff::closeConnection()
 {
     timeoutTimer->stop();
 
-    //qDebug() << tcpSocket->state();
     disconnect(tcpSocket, &QTcpSocket::connected, 0, 0);
     disconnect(tcpSocket, &QTcpSocket::readyRead, 0, 0);
 

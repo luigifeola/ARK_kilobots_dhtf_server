@@ -33,7 +33,6 @@ double mykilobotenvironment::normAngle(double angle){
 }
 
 QVector2D mykilobotenvironment::VectorRotation2D (double angle, QVector2D vec){
-    // qDebug() << "2D Rotation";
     QVector2D rotated_vector;
     double kx = (cos(angle)* vec.x()) + (-1.0*sin(angle) * vec.y());
     double ky = (sin(angle) * vec.x()) + (cos(angle) * vec.y());
@@ -110,13 +109,11 @@ void mykilobotenvironment::initialiseAreas()
     qDebug() << "areas_in" << activated_areas;
     qDebug() << "server_task" << server_task;
     qDebug() << "client_task" << client_task;
-    // qDebug() << "buffer" << receive_buffer;
 
 
     for (int areaID=0; areaID<16; areaID++){
         if(std::find(activated_areas.begin(),activated_areas.end(), areaID) != activated_areas.end())
         {
-            // qDebug() << "areaID" << areaID;
             QPointF areaPos((1.0+2.0*(areaID%4))*radius + (1.0+(areaID%4))*white_space, (1.0 + floor(areaID/4)*2.0 )*radius + (1.0 + floor(areaID/4))*white_space);
             areaPos += areasOffset;
             if(client_task[0] == "1")
@@ -161,8 +158,7 @@ void mykilobotenvironment::reset(){
 
 // Only update if environment is dynamic:
 void mykilobotenvironment::update() {
-    //eventualmente sarà qui che gestirai il completamento delle aree
-    // qDebug() << "UPDATE: " << receive_buffer;
+    qDebug() << "update(): " << receive_buffer;
 
     if(receive_buffer.startsWith("I") && this->initialised == false)
     {
@@ -180,7 +176,6 @@ void mykilobotenvironment::update() {
     else if(receive_buffer.startsWith("A"))
     {
         qDebug() << "Exp starts";
-        // qDebug() << "RECEIVED:" << receive_buffer;
         receive_buffer.remove(0,1);
         QVector<int> completed(areas.size(),0);
         for(int i=0; i<receive_buffer.size(); i++){
@@ -229,26 +224,21 @@ void mykilobotenvironment::update() {
 
 // generate virtual sensors reading and send it to the kbs (same as for ARGOS)
 void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
-    // qDebug() << QString("In updateVirtualSensor");
     // update local arrays
     kilobot_id k_id = kilobot_entity.getID();
     this->kilobots_positions[k_id] = kilobot_entity.getPosition();
 
-    // qDebug() << QString("saving colours");
     // update kilobot led colour (indicates the internal state of the kb)
     lightColour kb_colour = kilobot_entity.getLedColour();
     if(kb_colour == lightColour::RED){
         this->kilobots_colours[k_id] = Qt::red;     // kilobot in LEAVING
-        // qDebug() << "ReeEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else if(kb_colour == lightColour::BLUE){
         this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
-        // qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else
     {
         this->kilobots_colours[k_id] = Qt::black;   // random walking
-        // qDebug() << "BLack****************** " << k_id;
     }
 
 
@@ -324,7 +314,6 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
 
 
-    // qDebug() << QString("Sending message");
     // now we have everything up to date and everything we need
     // then if it is time to send the message to the kilobot send info to the kb
     if(this->time - this->lastSent[k_id] > minTimeBetweenTwoMsg){

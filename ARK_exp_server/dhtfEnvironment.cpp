@@ -290,16 +290,13 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     lightColour kb_colour = kilobot_entity.getLedColour();
     if(kb_colour == lightColour::RED){
         this->kilobots_colours[k_id] = Qt::red;     // kilobot in LEAVING
-        // qDebug() << "ReeEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else if(kb_colour == lightColour::BLUE){
         this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
-        // qDebug() << "BLUEEEEEEEEEEEEEEEEEEEEE " << k_id;
     }
     else
     {
         this->kilobots_colours[k_id] = Qt::black;   // random walking
-        // qDebug() << "BLack****************** " << k_id;
     }
 
 
@@ -415,7 +412,6 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
 
 
-    // qDebug() << QString("Sending message");
     // now we have everything up to date and everything we need
     // then if it is time to send the message to the kilobot send info to the kb
     if(this->time - this->lastSent[k_id] > minTimeBetweenTwoMsg){

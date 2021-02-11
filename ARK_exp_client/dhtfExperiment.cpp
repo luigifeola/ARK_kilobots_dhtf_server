@@ -39,7 +39,6 @@ extern "C" DHTFEXPSHARED_EXPORT KilobotExperiment *createExpt()
 
 /* setup the environment */
 mykilobotexperiment::mykilobotexperiment() {
-//     qDebug() << QString("in constructor");
 
     // Initialize seed
     QDateTime cd = QDateTime::currentDateTime();
@@ -108,7 +107,6 @@ void mykilobotexperiment::gotError(QAbstractSocket::SocketError err)
 
 /* create the GUI as a separate frame in the main ARK window */
 QWidget *mykilobotexperiment::createGUI() {
-//     qDebug() << QString("in create gui");
 
     QFrame *frame = new QFrame;
     QVBoxLayout *lay = new QVBoxLayout;
@@ -333,22 +331,6 @@ void mykilobotexperiment::run() {
     // Update Environment
     dhtfEnvironment.time = (float)time;
     qDebug() << "Buffer is: "<<dhtfEnvironment.receive_buffer << " " << time;
-
-    // TODO : CHECK if buffer exchanging and upadtating of the environment is well done
-    // send buffer with READY areas
-//    if(dhtfEnvironment.receive_buffer.startsWith("I"))
-//    {
-//        qDebug() << "RECEIVED:" << dhtfEnvironment.receive_buffer;
-//        dhtfEnvironment.initialiseAreas();
-//        dhtfEnvironment.receive_buffer.clear();
-//    }
-
-//    if(dhtfEnvironment.receive_buffer.startsWith("A"))
-//    {
-//        qDebug() << "RECEIVED:" << dhtfEnvironment.receive_buffer;
-//        dhtfEnvironment.update();
-//        dhtfEnvironment.receive_buffer.clear();
-//    }
 
     if( dhtfEnvironment.initialised == true || dhtfEnvironment.receive_buffer.startsWith("I") )
     {
