@@ -508,7 +508,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                     QVector<int> elementwiseOr;
                     elementwiseOr.reserve(prox.size());
                     std::transform( proximity.begin(), proximity.end(), prox.begin(),
-                            std::back_inserter( elementwiseOr ), std::logical_or<>() );
+                            std::back_inserter( elementwiseOr ), std::logical_or<int>() );
 
                     proximity = elementwiseOr;
                 }
@@ -522,7 +522,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                     QVector<int> elementwiseOr;
                     elementwiseOr.reserve(prox.size());
                     std::transform( proximity.begin(), proximity.end(), prox.begin(),
-                            std::back_inserter( elementwiseOr ), std::logical_or<>() );
+                            std::back_inserter( elementwiseOr ), std::logical_or<int>() );
 
                     proximity = elementwiseOr;
                 }
