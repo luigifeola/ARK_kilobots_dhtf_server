@@ -77,7 +77,6 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
     this->send_buffer = "";
     this->receive_buffer = "";
 
-    this->initialised_client = false;
     this->initialise_buffer = "";
     // define environment:
     // call any functions to setup features in the environment (goals, homes locations and parameters).

@@ -53,6 +53,7 @@ void ServerStuff::gotDisconnection()
 qint64 ServerStuff::sendToClient(QTcpSocket* socket, const QString& str)
 {
     //QString str1 = ui->lineEdit_message->text();
+    qDebug() << "Sending to client: " << str;
     QByteArray ba = str.toLocal8Bit();
     const char *c_str2 = ba.data();
     //client->tcpSocket->write(c_str2);

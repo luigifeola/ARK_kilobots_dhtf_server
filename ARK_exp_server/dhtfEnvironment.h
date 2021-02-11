@@ -68,7 +68,7 @@ public:
     float minTimeBetweenTwoMsg; // minimum time between two messages
     double time;
     bool saveLOG;
-    bool initialised_client;
+    bool initialised_client = false;
     QString initialise_buffer;
     QString send_buffer;
     QString receive_buffer;
