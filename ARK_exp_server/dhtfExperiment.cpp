@@ -402,14 +402,13 @@ void mykilobotexperiment::run() {
     }
     else if(dhtfEnvironment.initialised_client == false || dhtfEnvironment.receive_buffer.startsWith("M"))
     {
-        qDebug() << "MANDO SEMPRE L'INIT";
         sendToClient(dhtfEnvironment.initialise_buffer);
     }
 
 
     else if(dhtfEnvironment.send_buffer.startsWith("A") && qRound((this->time-last_ARK_message)*10.0f) >= ARK_message_period*10.0f )
     {
-        qDebug() << "ARK messages time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
+        // qDebug() << "ARK messages time: " << this->time <<" at " << QLocale("en_GB").toString( QDateTime::currentDateTime(), "hh:mm:ss.zzz");
         last_ARK_message = this->time;
         sendToClient(dhtfEnvironment.send_buffer);
         dhtfEnvironment.send_buffer.clear();

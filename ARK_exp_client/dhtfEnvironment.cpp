@@ -158,7 +158,6 @@ void mykilobotenvironment::reset(){
 
 // Only update if environment is dynamic:
 void mykilobotenvironment::update() {
-    qDebug() << "update(): " << receive_buffer;
 
     if(receive_buffer.startsWith("I") && this->initialised == false)
     {

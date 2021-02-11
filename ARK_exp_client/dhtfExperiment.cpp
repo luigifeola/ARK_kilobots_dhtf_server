@@ -58,10 +58,10 @@ mykilobotexperiment::mykilobotexperiment() {
 
 void mykilobotexperiment::receivedSomething(QString msg)
 {
-    //qDebug() << QString("Received from server: %1").arg(msg);
+    qDebug() << QString("Received from server: %1").arg(msg);
     dhtfEnvironment.receive_buffer = msg;
-    if(msg.startsWith("I"))
-        qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
+//    if(msg.startsWith("I"))
+//        qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
 }
 
 void mykilobotexperiment::on_pushButton_send_clicked()
