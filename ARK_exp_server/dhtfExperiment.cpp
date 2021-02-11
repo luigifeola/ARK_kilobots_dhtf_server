@@ -394,12 +394,12 @@ void mykilobotexperiment::run() {
 
     if(dhtfEnvironment.receive_buffer.startsWith("R")){
         dhtfEnvironment.initialised_client = true;
-        qDebug() << "************************************";
-        qDebug() << "*********INITIALISED ***************";
-        qDebug() << "************************************";
-        qDebug() << "************************************";
-        qDebug() << "************************************";
-        qDebug() << "************************************";
+//        qDebug() << "************************************";
+//        qDebug() << "*********INITIALISED ***************";
+//        qDebug() << "************************************";
+//        qDebug() << "************************************";
+//        qDebug() << "************************************";
+//        qDebug() << "************************************";
     }
     else if(dhtfEnvironment.initialised_client == false || dhtfEnvironment.receive_buffer.startsWith("M"))
     {
