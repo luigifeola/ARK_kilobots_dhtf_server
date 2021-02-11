@@ -25,8 +25,8 @@
 #include <QDir>
 
 #define STOP_AFTER 1800
-#define IP_ADDR "127.0.0.1" //local
-//#define IP_ADDR "143.167.48.37" //sheffield
+//#define IP_ADDR "127.0.0.1" //local
+#define IP_ADDR "143.167.48.37" //sheffield
 //#define IP_ADDR "150.146.65.45" //other CNR workstation
 #define PORT 7001
 
@@ -332,6 +332,7 @@ void mykilobotexperiment::run() {
 
     // Update Environment
     dhtfEnvironment.time = (float)time;
+    qDebug() << "Buffer is: "<<dhtfEnvironment.receive_buffer << " " << time;
 
     // TODO : CHECK if buffer exchanging and upadtating of the environment is well done
     // send buffer with READY areas
@@ -352,7 +353,9 @@ void mykilobotexperiment::run() {
     if( dhtfEnvironment.initialised == true || dhtfEnvironment.receive_buffer.startsWith("I") )
     {
         if(dhtfEnvironment.receive_buffer.startsWith("I"))
+        {
             sendToServer("Received initialisation");
+        }
 
         dhtfEnvironment.update();
 

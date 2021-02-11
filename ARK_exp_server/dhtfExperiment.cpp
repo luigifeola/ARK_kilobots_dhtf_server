@@ -405,9 +405,11 @@ void mykilobotexperiment::run() {
 
     if(dhtfEnvironment.receive_buffer.startsWith("R")){
         dhtfEnvironment.initialised_client = true;
+        qDebug() << "************************ \n ************************ \n ********INITIALIZED*** \n ************************ \N ************************";
     }
     else if(dhtfEnvironment.initialised_client == false || dhtfEnvironment.receive_buffer.startsWith("M"))
     {
+        qDebug() << "MANDO SEMPRE L'INIT";
         sendToClient(dhtfEnvironment.initialise_buffer);
     }
 

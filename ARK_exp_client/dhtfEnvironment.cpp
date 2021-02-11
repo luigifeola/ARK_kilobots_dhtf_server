@@ -100,7 +100,6 @@ void mykilobotenvironment::initialiseAreas()
     QString server_task = receive_buffer.right(num_areas);
     receive_buffer.chop(num_areas);
     QString areas_char = receive_buffer.right(num_areas);
-    receive_buffer.clear();
 
     for(int i=0; i<areas_char.size(); i++){
         activated_areas[i] = areas_char[i].toLatin1() - 97;
