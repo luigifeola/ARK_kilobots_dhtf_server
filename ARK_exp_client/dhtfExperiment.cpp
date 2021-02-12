@@ -24,7 +24,7 @@
 #include <QFile>
 #include <QDir>
 
-#define STOP_AFTER 1800
+#define STOP_AFTER 2000
 //#define IP_ADDR "127.0.0.1" //local
 #define IP_ADDR "143.167.48.37" //sheffield
 //#define IP_ADDR "150.146.65.45" //other CNR workstation
@@ -413,7 +413,8 @@ void mykilobotexperiment::run() {
                             << a->position.x() << '\t'
                             << a->position.y() << '\t'
                             << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
-                            << (a->completed == true ? 1:0);
+                            << (a->completed == true ? 1:0)<< '\t'
+                            << a->kilobots_in_area.size();
 
             }
             log_stream1 << endl;

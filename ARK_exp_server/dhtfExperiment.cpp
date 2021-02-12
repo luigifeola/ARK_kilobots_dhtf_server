@@ -24,7 +24,7 @@
 #include <QFile>
 #include <QDir>
 
-#define STOP_AFTER 1800
+#define STOP_AFTER 2000
 
 // return pointer to interface!
 // mykilobotexperiment can and should be completely hidden from the application
@@ -474,7 +474,8 @@ void mykilobotexperiment::run() {
                             << a->position.x() << '\t'
                             << a->position.y() << '\t'
                             << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
-                            << (a->completed == true ? 1:0);
+                            << (a->completed == true ? 1:0)<< '\t'
+                            << a->kilobots_in_area.size();
 
             }
             log_stream1 << endl;
