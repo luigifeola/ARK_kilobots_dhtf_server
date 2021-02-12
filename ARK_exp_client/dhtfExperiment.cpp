@@ -284,7 +284,7 @@ void mykilobotexperiment::initialise(bool isResume) {
                             << a->position.y() << '\t'
                             << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
                             << (a->completed == true ? 1:0)<< '\t'
-                            << a->kilobots_in_area;
+                            << a->kilobots_in_area.size();
 
             }
             log_stream1 << endl;
