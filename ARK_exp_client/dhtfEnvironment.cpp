@@ -174,7 +174,6 @@ void mykilobotenvironment::update() {
 
     else if(receive_buffer.startsWith("A"))
     {
-        qDebug() << "Exp starts";
         receive_buffer.remove(0,1);
         QVector<int> completed(areas.size(),0);
         for(int i=0; i<receive_buffer.size(); i++){

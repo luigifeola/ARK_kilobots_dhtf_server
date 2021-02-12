@@ -272,7 +272,8 @@ void mykilobotexperiment::initialise(bool isResume) {
 //                    << "positionX" << '\t'
 //                    << "positionY" << '\t'
 //                    << "colour" << '\t'
-//                    << "state" << '\n';
+//                    << "state" << '\t'
+//                    << "kilobots_in_area" << '\n';
             //Initial state
             log_stream1 << this->time;
             for(Area* a : dhtfEnvironment.areas)
@@ -282,7 +283,8 @@ void mykilobotexperiment::initialise(bool isResume) {
                             << a->position.x() << '\t'
                             << a->position.y() << '\t'
                             << (a->type == HARD_TASK ? 1:0) << '\t'       /*hard red, soft blue*/
-                            << (a->completed == true ? 1:0);
+                            << (a->completed == true ? 1:0)<< '\t'
+                            << a->kilobots_in_area;
 
             }
             log_stream1 << endl;
