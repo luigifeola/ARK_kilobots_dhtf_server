@@ -24,10 +24,10 @@
 #include <QFile>
 #include <QDir>
 
-#define STOP_AFTER 2000
+#define STOP_AFTER 1000
 //#define IP_ADDR "127.0.0.1" //local
-#define IP_ADDR "143.167.48.37" //sheffield
-//#define IP_ADDR "150.146.65.45" //other CNR workstation
+//#define IP_ADDR "143.167.48.37" //sheffield
+#define IP_ADDR "150.146.65.45" //other CNR workstation
 #define PORT 7001
 
 // return pointer to interface!

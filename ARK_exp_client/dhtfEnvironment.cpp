@@ -261,7 +261,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         if(a->isInside(kilobot_entity.getPosition()))
         {
 
-            if(kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == LEAVING)
+            if(kilobots_colours[k_id] == Qt::red /*|| kilobots_states[k_id] == LEAVING*/)
             {
                 kilobots_states[k_id] = LEAVING;
                 a->kilobots_in_area.erase(std::remove(a->kilobots_in_area.begin(), a->kilobots_in_area.end(), k_id),
@@ -298,10 +298,10 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
     }
 
-    if(!found)
+    if(!found)      // if NOT present in any area
     {
-        if(kilobots_states[k_id] == RANDOM_WALK)
-            kilobots_states_LOG[k_id] = kilobots_states[k_id];
+//        if(kilobots_states[k_id] == RANDOM_WALK)
+//            kilobots_states_LOG[k_id] = kilobots_states[k_id];
         kilobots_states_LOG[k_id] = kilobots_states[k_id];
         kilobots_states[k_id] = RANDOM_WALK;
     }
@@ -361,6 +361,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             emit transmitKiloState(message);
         }
 
+        //check for wall avoidance
         else if( abs(shifted_pos.x()) > reachable_distance ||
                  abs(shifted_pos.y()) > reachable_distance )
         {
