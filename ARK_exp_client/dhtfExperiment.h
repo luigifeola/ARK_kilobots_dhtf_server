@@ -131,8 +131,9 @@ public slots:
     void gotError(QAbstractSocket::SocketError err);
 
 private slots:
+    void onComboboxActivated(const QString &);
     void on_pushButton_send_clicked();
-    void on_pushButton_connect_clicked(){client->connect2host();}
+    void on_pushButton_connect_clicked();
     void on_pushButton_disconnect_clicked();
 
 private:
@@ -174,6 +175,8 @@ private:
     QVector < kilobot_id >  kilobots_ids;
     QVector <KiloLog> kilobots;
 
+    //
+    QString server_address;
 
     ClientStuff *client;
 }; /* end class mykilobotexperiment */

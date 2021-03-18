@@ -160,7 +160,10 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
 
     case 1:
       location = sa_type;
-      internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+      if(internal_timeout == 0 )
+      {
+        internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+      }
       break;
     
     case 2:

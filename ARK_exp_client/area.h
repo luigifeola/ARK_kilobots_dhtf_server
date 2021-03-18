@@ -18,8 +18,8 @@
 #include <QVector>
 #include <QDebug>
 
-#define SOFT_TASK_COMPLETED 1
-#define HARD_TASK_COMPLETED 3
+#define SOFT_TASK_COMPLETED 2
+#define HARD_TASK_COMPLETED 2
 
 typedef enum
 {

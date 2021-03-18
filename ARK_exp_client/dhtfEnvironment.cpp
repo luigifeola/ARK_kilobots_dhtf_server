@@ -261,7 +261,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         if(a->isInside(kilobot_entity.getPosition()))
         {
 
-            if(kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == LEAVING)
+            if(kilobots_colours[k_id] == Qt::red /*|| kilobots_states[k_id] == LEAVING*/)
             {
                 kilobots_states[k_id] = LEAVING;
                 a->kilobots_in_area.erase(std::remove(a->kilobots_in_area.begin(), a->kilobots_in_area.end(), k_id),

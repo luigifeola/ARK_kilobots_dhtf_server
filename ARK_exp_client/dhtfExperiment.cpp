@@ -6,6 +6,7 @@
 
 // widgets
 #include <QPushButton>
+#include <QComboBox>
 #include <QLineEdit>
 #include <QHBoxLayout>
 #include <QCheckBox>
@@ -25,9 +26,6 @@
 #include <QDir>
 
 #define STOP_AFTER 2000
-//#define IP_ADDR "127.0.0.1" //local
-#define IP_ADDR "143.167.48.37" //sheffield
-//#define IP_ADDR "150.146.65.45" //other CNR workstation
 #define PORT 7001
 
 // return pointer to interface!
@@ -37,6 +35,15 @@ extern "C" DHTFEXPSHARED_EXPORT KilobotExperiment *createExpt()
     return new mykilobotexperiment();
 }
 
+void mykilobotexperiment::onComboboxActivated(const QString &text)
+{
+    if(text=="Sheffield")
+        this->server_address = "143.167.48.37";
+    else if(text=="CNR")
+        this->server_address = "150.146.65.45";
+    else if(text=="Local")
+        this->server_address = "127.0.0.1";
+}
 /* setup the environment */
 mykilobotexperiment::mykilobotexperiment() {
 
@@ -48,12 +55,6 @@ mykilobotexperiment::mykilobotexperiment() {
     connect(&dhtfEnvironment,SIGNAL(transmitKiloState(kilobot_message)), this, SLOT(signalKilobotExpt(kilobot_message)));
     this->serviceInterval = 100; // timestep expressed in ms
 
-
-    client = new ClientStuff(IP_ADDR, 7001); //local
-    //    setStatus(client->getStatus());
-    connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
-    connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(gotError(QAbstractSocket::SocketError)));
 }
 
 void mykilobotexperiment::receivedSomething(QString msg)
@@ -62,6 +63,22 @@ void mykilobotexperiment::receivedSomething(QString msg)
     dhtfEnvironment.receive_buffer = msg;
 //    if(msg.startsWith("I"))
 //        qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
+}
+
+void mykilobotexperiment::on_pushButton_connect_clicked(){
+
+    if (this->server_address == "") {
+        qDebug()<<"Select the server address";
+    }
+    else{
+        qDebug()<<"Connecting to the server...";
+        client = new ClientStuff(this->server_address, 7001); //local
+        //    setStatus(client->getStatus());
+        connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);
+        connect(client->tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(gotError(QAbstractSocket::SocketError)));
+        client->connect2host();
+    }
 }
 
 void mykilobotexperiment::on_pushButton_send_clicked()
@@ -128,6 +145,13 @@ QWidget *mykilobotexperiment::createGUI() {
     QVBoxLayout *layout2 = new QVBoxLayout;
     socketpart->setLayout(layout2);
 
+    // add combo box for server ip
+    QComboBox *server_address = new QComboBox();
+    server_address->addItem("Sheffield","Sheffield");
+    server_address->addItem("Local","Local");
+    server_address->addItem("CNR","CNR");
+    layout2->addWidget(server_address);
+
     // add QPushButton to client for connecting socket
     QPushButton *connect_button = new QPushButton("Connect to server");
     connect_button->setStyleSheet("color: rgb(0, 0, 255)");
@@ -148,6 +172,8 @@ QWidget *mykilobotexperiment::createGUI() {
     lay->addWidget(socketpart);
 
 
+
+    connect(server_address, SIGNAL(activated(const QString &)),this, SLOT(onComboboxActivated(const QString &)));
     connect(connect_button, SIGNAL(clicked(bool)),this, SLOT(on_pushButton_connect_clicked()));
     connect(send_some, SIGNAL(clicked(bool)),this, SLOT(on_pushButton_send_clicked()));
 
@@ -318,6 +344,12 @@ void mykilobotexperiment::stopExperiment() {
 }
 
 void mykilobotexperiment::run() {
+
+    qDebug() << QString("*********************************************");
+    qDebug() << QString("*********************************************");
+    qDebug() << this->server_address;
+    qDebug() << QString("*********************************************");
+    qDebug() << QString("*********************************************");
     //qDebug() << QString("in run");
 
     this->time=m_elapsed_time.elapsed()/1000.0; // time in seconds
