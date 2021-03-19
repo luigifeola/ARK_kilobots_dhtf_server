@@ -71,7 +71,7 @@ void mykilobotexperiment::on_pushButton_connect_clicked(){
         qDebug()<<"Select the server address";
     }
     else{
-        qDebug()<<"Connecting to the server...";
+        qDebug()<<"Connecting to the server at "<< this->server_address;
         client = new ClientStuff(this->server_address, 7001); //local
         //    setStatus(client->getStatus());
         connect(client, &ClientStuff::hasReadSome, this, &mykilobotexperiment::receivedSomething);

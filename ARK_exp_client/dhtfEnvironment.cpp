@@ -165,8 +165,6 @@ void mykilobotenvironment::update() {
         qDebug() << "*********INITIALISING ENV*********";
         qDebug() << "************************************";
         qDebug() << "************************************";
-        qDebug() << "************************************";
-        qDebug() << "************************************";
         this->initialised = true;
         initialiseAreas();
         receive_buffer.clear();
