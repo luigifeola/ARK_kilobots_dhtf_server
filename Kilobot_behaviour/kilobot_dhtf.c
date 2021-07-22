@@ -63,12 +63,12 @@ motion_t backup_motion = STOP;
 
 /* LUIGI---------------------------------------------- */
 /***********WALK PARAMETERS***********/
-const float std_motion_steps = 20 * 16; // variance of the gaussian used to compute forward motion
-const float levy_exponent = 1.4;        // 2 is brownian like motion (alpha)
-const float crw_exponent = 0.9;         // higher more straight (rho)
-uint32_t turning_ticks = 0;             // keep count of ticks of turning
-const uint8_t max_turning_ticks = 80;   /* constant to allow a maximum rotation of 180 degrees with \omega=\pi/5 */
-unsigned int straight_ticks = 0;        // keep count of ticks of going straight
+const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
+const float levy_exponent = 2.0;       // 2 is brownian like motion (alpha)
+const float crw_exponent = 0.0;        // higher more straight (rho)
+uint32_t turning_ticks = 0;            // keep count of ticks of turning
+const uint8_t max_turning_ticks = 120; /* constant to allow a maximum rotation of 180 degrees with \omega=\pi/5 */
+unsigned int straight_ticks = 0;       // keep count of ticks of going straight
 const uint16_t max_straight_ticks = 320;
 uint32_t last_motion_ticks = 0;
 
@@ -97,6 +97,7 @@ const int TIMEOUT_CONST = 1;
 const uint32_t to_sec = 32;
 uint32_t last_waiting_ticks = 0;
 
+uint32_t waiting_blinking_counter = 0;
 uint32_t party_ticks = 0;
 
 /*-------------------------------------------------------------------*/
@@ -181,6 +182,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
       proximity_sensor = sa_payload;
       wall_avoidance_start = true;
     }
+
     break;
 
   case 3:
@@ -454,6 +456,17 @@ void finite_state_machine()
   }
   case WAITING:
   {
+    if (kilo_ticks > (waiting_blinking_counter + to_sec * 5))
+    {
+      waiting_blinking_counter = kilo_ticks;
+      set_color(RGB(0, 0, 3));
+    }
+
+    else if (kilo_ticks > (waiting_blinking_counter + to_sec / 2 * 9)) //because an int divsion, otherwise to_sec * 4.5
+    {
+      set_color(RGB(0, 0, 0));
+    }
+
     if (location == OUTSIDE)
     {
       set_motion(FORWARD);
@@ -472,6 +485,7 @@ void finite_state_machine()
       current_state = LEAVING;
       set_color(RGB(3, 0, 0));
     }
+
     break;
   }
   case LEAVING:

@@ -34,8 +34,8 @@
 #define KILO_DIAMETER 66
 #define CM_TO_PIXEL 20
 
-#define ACTIVE_AREAS 16
-#define HARD_TASKS_NUMBER 8
+#define ACTIVE_AREAS 4
+#define HARD_TASKS_NUMBER 2
 
 typedef enum {
     RANDOM_WALK=0,

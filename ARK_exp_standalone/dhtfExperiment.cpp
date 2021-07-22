@@ -24,7 +24,7 @@
 #include <QFile>
 #include <QDir>
 
-#define STOP_AFTER 2000
+#define STOP_AFTER 600
 
 // return pointer to interface!
 // mykilobotexperiment can and should be completely hidden from the application
