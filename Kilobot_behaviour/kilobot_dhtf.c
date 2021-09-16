@@ -22,6 +22,13 @@ typedef enum
 } bool;
 
 typedef enum
+{ // Enum for boolean flags
+  CONSTANT = 0,
+  PERSISTENT = 1,
+  BROWNIAN = 2,
+} adaptive_walk;
+
+typedef enum
 { // Enum for the robot states
   RANDOM_WALKING = 0,
   WAITING = 1,
@@ -63,9 +70,10 @@ motion_t backup_motion = STOP;
 
 /* LUIGI---------------------------------------------- */
 /***********WALK PARAMETERS***********/
+adaptive_walk current_walk = CONSTANT; //start with a meaningless value
 const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-const float levy_exponent = 2.0;       // 2 is brownian like motion (alpha)
-const float crw_exponent = 0.0;        // higher more straight (rho)
+float levy_exponent = 1.4;             // 2 is brownian like motion (alpha)
+float crw_exponent = 0.9;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
 const uint8_t max_turning_ticks = 120; /* constant to allow a maximum rotation of 180 degrees with \omega=\pi/5 */
 unsigned int straight_ticks = 0;       // keep count of ticks of going straight
@@ -93,7 +101,9 @@ int internal_timeout = 0; //Internal counter for task complention wait
 int turn_timer;           //Avoid the robot to get stuck in Leagving
 
 /* PARAMETER: change this value to determine timeout length */
-const int TIMEOUT_CONST = 1;
+const int TIMEOUT_CONST = 10;
+int vIncrement = 0;
+int adaptiveTimeout = 0;
 const uint32_t to_sec = 32;
 uint32_t last_waiting_ticks = 0;
 
@@ -170,7 +180,14 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     location = sa_type;
     if (internal_timeout == 0)
     {
-      internal_timeout = sa_payload * TIMEOUT_CONST * 10;
+      internal_timeout = ((sa_payload & 0XFF) * TIMEOUT_CONST) + vIncrement;
+      current_walk = (sa_payload >> 8) & 0x03;
+      adaptiveTimeout = (sa_payload >> 7) & 0x01;
+      internal_timeout = ((sa_payload & 0X7F) * TIMEOUT_CONST);
+      if (adaptiveTimeout == 1)
+      {
+        internal_timeout += vIncrement;
+      }
     }
     break;
 
@@ -291,6 +308,19 @@ void rx_message(message_t *msg, distance_measurement_t *d)
 
 void random_walk()
 {
+  switch (current_walk)
+  {
+  case PERSISTENT:
+    crw_exponent = 0.9;
+    levy_exponent = 1.4;
+    break;
+  case BROWNIAN:
+    crw_exponent = 0.0;
+    levy_exponent = 2.0;
+    break;
+  default:
+    break;
+  }
   switch (current_motion_type)
   {
   case TURN_LEFT:
@@ -456,33 +486,39 @@ void finite_state_machine()
   }
   case WAITING:
   {
-    if (kilo_ticks > (waiting_blinking_counter + to_sec * 5))
-    {
-      waiting_blinking_counter = kilo_ticks;
-      set_color(RGB(0, 0, 3));
-    }
+    // if (kilo_ticks > (waiting_blinking_counter + to_sec * 5))
+    // {
+    //   waiting_blinking_counter = kilo_ticks;
+    //   set_color(RGB(0, 0, 3));
+    // }
 
-    else if (kilo_ticks > (waiting_blinking_counter + to_sec / 2 * 9)) //because an int divsion, otherwise to_sec * 4.5
-    {
-      set_color(RGB(0, 0, 0));
-    }
-
+    // else if (kilo_ticks > (waiting_blinking_counter + to_sec / 2 * 9)) //because an int divsion, otherwise to_sec * 4.5
+    // {
+    //   set_color(RGB(0, 0, 0));
+    // }
+    /* Completion condition */
     if (location == OUTSIDE)
     {
+      current_state = RANDOM_WALKING;
       set_motion(FORWARD);
 
+      if (internal_timeout + vIncrement >= 10)
+      {
+        vIncrement -= 10;
+      }
+
       internal_timeout = 0;
-      current_state = RANDOM_WALKING;
       set_color(RGB(0, 0, 0));
     }
     /* Timeout condition */
-    if (kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
+    else if (kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
     {
-      internal_timeout = 0;
-
+      current_state = LEAVING;
       set_motion(FORWARD);
 
-      current_state = LEAVING;
+      internal_timeout = 0;
+      vIncrement += 10;
+
       set_color(RGB(3, 0, 0));
     }
 
@@ -507,8 +543,8 @@ void finite_state_machine()
     if (kilo_ticks > party_ticks + 10 * to_sec)
     {
       set_motion(FORWARD);
-      set_color(RGB(0, 0, 0));
       current_state = RANDOM_WALKING;
+      set_color(RGB(0, 0, 0));
     }
     break;
   }
@@ -524,6 +560,7 @@ void finite_state_machine()
 /*-------------------------------------------------------------------*/
 void loop()
 {
+
   if (start == 1)
   {
     /* Initialise motion variables */

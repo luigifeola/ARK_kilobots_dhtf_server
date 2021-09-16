@@ -61,15 +61,17 @@ public:
     double orientation;                             // kilobot orientation
     kilobot_colour colour;                          // kilobot led colour
     kilobot_state state;                            //kilobot state (i.e. INSIDE, OUTSIDE, LEAVING)
+    int internal_timer;                             //internal timeout, waiting other robots
     bool in_collision;
 
     /** Update all log values */
-    void updateAllValues(kilobot_id id, QPointF position, double orientation, kilobot_colour colour, kilobot_state state) {
+    void updateAllValues(kilobot_id id, QPointF position, double orientation, kilobot_colour colour, kilobot_state state, int timer) {
         this->id = id;
         this->position = position;
         this->orientation = orientation;
         this->colour = colour;
         this->state = state;
+        this->internal_timer = timer/10;
     }
 
     /** Set position */
@@ -140,15 +142,17 @@ private:
     bool saveImages;
     int savedImagesCounter;
     bool logExp;
-    QFile log_file_areas;
     QString log_filename_prefix = "log_dhtf";
-    QTextStream log_stream_areas;
-    QFile log_file;
-    QFile log_file1;
-    QTextStream log_stream;
+    QFile log_file;                 //kiloLOG
     QTextStream log_stream1;
+    QFile log_file1;                //areaLOG
+    QTextStream log_stream;
+    QFile log_file_areas;           //completAreasLOG
+    QTextStream log_stream_areas;
+    QFile log_file_timeout;         //elpsTimeoutLOG
+    QTextStream log_stream_timeout;
 
-    float log_period = 1.0;
+    float log_period = 2.0;
     float last_log = 0.0;
 
     float ARK_message_period = 2.0;

@@ -28,8 +28,14 @@ namespace {
     const int kHard_task_requirement = 4;
     const int kSoft_task_requirement = 2;
 
-    const double kRespawnTimer = 60;
-    const double kTimerMultiplier = 30;
+    const double kRespawnTimer = 30;
+    const double kTimerMultiplier = 60;     // 60s kilobot internal timeout
+
+    const bool kRegions = false;
+    const bool kAdaptiveWalk = true;
+    const bool kAdaptiveTimeout = true;
+
+    const int kSeed = 700;
 }
 
 double mykilobotenvironment::normAngle(double angle){
@@ -80,7 +86,8 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
     // environment specifications
 
 //    qDebug() << "ENV. mykilobotenvironment";
-    this->saveLOG = false;
+    this->areaCompletedLOG = false;
+    this->elapsedTimeoutLOG = false;
     // call any functions to setup features in the environment (goals, homes locations and parameters).
     reset();
 }
@@ -113,11 +120,15 @@ void mykilobotenvironment::reset()
     kilobots_colours.clear();
     kilobots_in_collision.clear();
 
+    kilobot_walks.clear();
+    kilobot_timers.clear();
+
+    vTimerMultiplier = kTimerMultiplier;
+
     std::default_random_engine re;
-    re.seed(200);
+    re.seed(kSeed);
 //    re.seed(qrand());
 
-    /**TODO: fix task virtual set-up*/
     for (int i = 0; i < ACTIVE_AREAS / 2; i++)
     {
         int x_pos, y_pos, y_opposite;
@@ -148,15 +159,15 @@ void mykilobotenvironment::reset()
 
         std::uniform_int_distribution<int> distr_true_false(0,1);
         int b = distr_true_false(re);
-        if(b)
+        if(kRegions || b)
         {
-            areas.push_back(new Area(i, HARD_TASK, QPointF(x_pos, y_pos), kTask_radius, kHard_task_requirement, kRespawnTimer, kTimerMultiplier));
-            areas.push_back(new Area(i + ACTIVE_AREAS / 2, SOFT_TASK, oppposite_pos, kTask_radius, kSoft_task_requirement, kRespawnTimer, kTimerMultiplier));
+            areas.push_back(new Area(i, HARD_TASK, QPointF(x_pos, y_pos), kTask_radius, kHard_task_requirement, kRespawnTimer, vTimerMultiplier));
+            areas.push_back(new Area(i + ACTIVE_AREAS / 2, SOFT_TASK, oppposite_pos, kTask_radius, kSoft_task_requirement, kRespawnTimer, vTimerMultiplier));
         }
         else
         {
-            areas.push_back(new Area(i, SOFT_TASK, QPointF(x_pos, y_pos), kTask_radius, kSoft_task_requirement, kRespawnTimer, kTimerMultiplier));
-            areas.push_back(new Area(i + ACTIVE_AREAS / 2, HARD_TASK, oppposite_pos, kTask_radius, kHard_task_requirement, kRespawnTimer, kTimerMultiplier));
+            areas.push_back(new Area(i, SOFT_TASK, QPointF(x_pos, y_pos), kTask_radius, kSoft_task_requirement, kRespawnTimer, vTimerMultiplier));
+            areas.push_back(new Area(i + ACTIVE_AREAS / 2, HARD_TASK, oppposite_pos, kTask_radius, kHard_task_requirement, kRespawnTimer, vTimerMultiplier));
         }
     }
 
@@ -168,6 +179,26 @@ void mykilobotenvironment::update() {
 }
 
 
+void mykilobotenvironment::decrementTimers()
+{
+    if(!kAdaptiveTimeout)
+        return;
+
+    for(int i=0; i<completed_area->kilobots_in_area.size(); i++)
+    {
+        if(kilobot_timers[completed_area->kilobots_in_area[i]] > 10)
+        {
+            kilobot_timers[completed_area->kilobots_in_area[i]] -= 10;
+//            if(kilobots_states[completed_area->kilobots_in_area[i]] == RANDOM_WALK)
+//                qDebug() << "kID:" << completed_area->kilobots_in_area[i] << " RANDOM WALKING";
+//            else if(kilobots_states[completed_area->kilobots_in_area[i]] == INSIDE_AREA)
+//                qDebug() << "kID:" << completed_area->kilobots_in_area[i] << " INSIDE!!";
+//            else
+//                qDebug() << "kID:" << completed_area->kilobots_in_area[i] << " LEAVING!!";
+//            qDebug() << "kID:" << completed_area->kilobots_in_area[i] << " area completed, timeout now is:" << kilobot_timers[completed_area->kilobots_in_area[i]];
+        }
+    }
+}
 
 // generate virtual sensors reading and send it to the kbs (same as for ARGOS)
 void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {   
@@ -231,7 +262,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 //                    emit transmitKiloState(party_message);
 //                }
 
-                this->saveLOG = true;
+                this->areaCompletedLOG = true;
             }
 
             if(!areas[i]->Respawn(this->time))
@@ -246,6 +277,20 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
             if(kilobots_colours[k_id] == Qt::red)
             {
+                if (kilobots_states[k_id] == INSIDE_AREA)
+                {
+                    this->elapsedTimeoutLOG = true;
+                    *elapsedTimeout_area = *areas[i];
+                    elapsedTimeout_kID = k_id;
+
+                    if(kAdaptiveTimeout)
+                    {
+                        kilobot_timers[k_id] += 10;
+                    }
+
+                    qDebug() << "kID:" << k_id << " elapsed timeout, now is:" << kilobot_timers[k_id];
+                }
+
                 kilobots_states[k_id] = LEAVING;
                 areas[i]->kilobots_in_area.erase(std::remove(areas[i]->kilobots_in_area.begin(), areas[i]->kilobots_in_area.end(), k_id),
                                           areas[i]->kilobots_in_area.end());
@@ -259,13 +304,10 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 if(std::find(areas[i]->kilobots_in_area.begin(),areas[i]->kilobots_in_area.end(), k_id) == areas[i]->kilobots_in_area.end())
                     areas[i]->kilobots_in_area.push_back(k_id);
 
-                // inside small radius (radius - kilodiameter)
-                if(areas[i]->isInside(kilobot_entity.getPosition(), KILO_DIAMETER/2.0))
-                {
-                    kilobots_states[k_id] = INSIDE_AREA;
-
-                    timer_to_send = areas[i]->waiting_timer / 10;
-                }
+                kilobots_states[k_id] = INSIDE_AREA;
+                kilobot_walks[k_id] = (areas[i]->color == Qt::red ? BROWNIAN : PERSISTENT);
+//                    qDebug() << "kID:" << k_id << " inside area " << (areas[i]->color == Qt::red ? "red" : "blue");
+                timer_to_send = vTimerMultiplier / 10;
 
                 found = true;
                 break;
@@ -303,7 +345,6 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         // blue+outside = leaving procedure from task is terminated
 
         /* Prepare the inividual kilobot's message                   */
-        /* see README.md to understand about ARK messaging           */
         /* data has 3x24 bits divided as                             */
         /*   ID 10b    type 4b  data 10b     <- ARK msg              */
         /*  data[0]   data[1]   data[2]      <- kb msg               */
@@ -346,7 +387,23 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         {
             message.id = k_id;
             message.type = INSIDE_AREA;   // sending inside to the kilobot
-            message.data = timer_to_send; //seconds
+            message.data = (int(vTimerMultiplier / 10) & 0x7F); //seconds
+
+            if(kAdaptiveWalk)
+            {
+                message.data = message.data | (kilobot_walks[k_id] << 8);
+            }
+            if(kAdaptiveTimeout)
+            {
+                message.data = message.data | (1 << 7);
+            }
+
+//            qDebug() << "time:" << this->time
+//                     << "\tkID:" << k_id
+//                     << "\twalk:" << (((message.data >> 8) & 0x03) == 2 ? " BROWNIAN " : " PERSISTENT ")
+//                     << (((message.data >> 7) & 0x01) == 0 ? " NON adaptive timeout " : " ADAPTIVE TIMEOUT ")
+//                     << "\t timer:" << (message.data & 0x7F)
+//                     << "\t fake timer:" << kilobot_timers[k_id];
 
 //            qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;
