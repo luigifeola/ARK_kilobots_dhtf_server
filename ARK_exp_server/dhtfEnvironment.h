@@ -27,7 +27,7 @@
 #include "area.h"
 
 #define SCALING 0.5
-#define SHIFTX 0 //sheffield
+#define SHIFTX 0    //sheffield
 #define SHIFTY 1000 //sheffield
 //#define SHIFTX 500 //cnr
 //#define SHIFTY 500 //cnr
@@ -38,12 +38,13 @@
 #define ACTIVE_AREAS 8
 #define HARD_TASKS_NUMBER 4
 
-typedef enum {
-    RANDOM_WALK=0,
-    INSIDE_AREA=1,
-    LEAVING=2,
-    PARTY=3,
-}kilobot_state;
+typedef enum
+{
+    RANDOM_WALK = 0,
+    INSIDE_AREA = 1,
+    LEAVING = 2,
+    PARTY = 3,
+} kilobot_state;
 
 class mykilobotenvironment : public KilobotEnvironment
 {
@@ -53,15 +54,13 @@ public:
     void reset();
 
     QVector<kilobot_state> kilobots_states; // list of all kilobots locations meaning 0 for outside areas, 1 for inside
-    QVector<kilobot_state> kilobots_states_LOG;
     QVector<QPointF> kilobots_positions;    // list of all kilobots positions
-    QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate the state of the kilobot
+    QVector<QColor> kilobots_colours;       // list of all kilobots led colours, the led indicate the state of the kilobot
 
-    QVector<Area*> areas;   // list of all areas present in the experiment
-    Area* completed_area = new Area(1000, 0, 0, QPointF(1000.0,1000.0),200.0); // random values
+    QVector<Area *> areas;                                                       // list of all areas present in the experiment
+    Area *completed_area = new Area(1000, 0, 0, QPointF(1000.0, 1000.0), 200.0); // random values
 
-    QVector<float> lastSent;    // when the last message was sent to the kb at given position
-
+    QVector<float> lastSent; // when the last message was sent to the kb at given position
 
     int ArenaX, ArenaY;
 
@@ -72,7 +71,7 @@ public:
     QString initialise_buffer;
     QString send_buffer;
     QString receive_buffer;
-// signals and slots are used by qt to signal state changes to objects
+    // signals and slots are used by qt to signal state changes to objects
 signals:
     void errorMessage(QString);
 
@@ -80,16 +79,12 @@ public slots:
     void update();
     void updateVirtualSensor(Kilobot kilobot);
 
-
 private:
     bool isTooclose(int kilobot_id);
     void initialiseEnvironment(QVector<int> activated_areas, QVector<uint> hard_tasks, QVector<uint> hard_tasks_client);
     double normAngle(double angle);
-    QVector2D VectorRotation2D (double angle, QVector2D vec);
+    QVector2D VectorRotation2D(double angle, QVector2D vec);
     QVector<int> proximity_sensor(QVector2D obstacle_direction, double kilo_rotation, int num_bit);
 };
-
-
-
 
 #endif // DHTFENVIRONMENT_H
