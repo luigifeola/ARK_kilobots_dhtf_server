@@ -72,8 +72,8 @@ motion_t backup_motion = STOP;
 /***********WALK PARAMETERS***********/
 adaptive_walk current_walk = CONSTANT; //start with a meaningless value
 const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-float levy_exponent = 1.4;             // 2 is brownian like motion (alpha)
-float crw_exponent = 0.9;              // higher more straight (rho)
+float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
+float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
 const uint8_t max_turning_ticks = 120; /* constant to allow a maximum rotation of 180 degrees with \omega=\pi/5 */
 unsigned int straight_ticks = 0;       // keep count of ticks of going straight
@@ -98,7 +98,6 @@ int sa_payload = 0;
 uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : not received, 1 : received, 2 : not need anymore to receive
 int location = 0;
 int internal_timeout = 0; //Internal counter for task complention wait
-int turn_timer;           //Avoid the robot to get stuck in Leagving
 
 /* PARAMETER: change this value to determine timeout length */
 const int TIMEOUT_CONST = 10;
@@ -180,7 +179,6 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     location = sa_type;
     if (internal_timeout == 0)
     {
-      internal_timeout = ((sa_payload & 0XFF) * TIMEOUT_CONST) + vIncrement;
       current_walk = (sa_payload >> 8) & 0x03;
       adaptiveTimeout = (sa_payload >> 7) & 0x01;
       internal_timeout = ((sa_payload & 0X7F) * TIMEOUT_CONST);
@@ -502,7 +500,7 @@ void finite_state_machine()
       current_state = RANDOM_WALKING;
       set_motion(FORWARD);
 
-      if (internal_timeout + vIncrement >= 10)
+      if (internal_timeout > 10)
       {
         vIncrement -= 10;
       }

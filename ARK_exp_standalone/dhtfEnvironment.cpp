@@ -32,10 +32,10 @@ namespace
     const double kTimerMultiplier = 60; // 60s kilobot internal timeout
 
     const bool kRegions = false;
-    const bool kAdaptiveWalk = true;
+    const bool kAdaptiveWalk = false;
     const bool kAdaptiveTimeout = true;
 
-    const int kSeed = 700;
+    const int kSeed = 66665555;
 }
 
 double mykilobotenvironment::normAngle(double angle)
@@ -131,8 +131,8 @@ void mykilobotenvironment::reset()
     vTimerMultiplier = kTimerMultiplier;
 
     std::default_random_engine re;
-    re.seed(kSeed);
-    //    re.seed(qrand());
+//    re.seed(kSeed);
+    re.seed(qrand());
 
     for (int i = 0; i < ACTIVE_AREAS / 2; i++)
     {
