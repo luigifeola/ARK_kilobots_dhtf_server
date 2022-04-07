@@ -254,7 +254,7 @@ void mykilobotexperiment::initialise(bool isResume)
             log_file_areas.close();
         }
         // log filename consist of the prefix and current date and time
-        QString log_filename = log_filename_prefix + "_completedAreas_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        QString log_filename = log_filename_prefix + "_completedAreas.txt";
         log_file_areas.setFileName(log_filename);
         // open the file
         if (log_file_areas.open(QIODevice::WriteOnly))
@@ -284,7 +284,7 @@ void mykilobotexperiment::initialise(bool isResume)
             log_file.close();
         }
         // log filename consist of the prefix and current date and time
-        log_filename = log_filename_prefix + "_kilopos_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_filename = log_filename_prefix + "_kilopos.txt";
         log_file.setFileName(log_filename);
         // open the file
         if (log_file.open(QIODevice::WriteOnly))
@@ -326,7 +326,7 @@ void mykilobotexperiment::initialise(bool isResume)
             log_file1.close();
         }
         // log filename consist of the prefix and current date and time
-        log_filename = log_filename_prefix + "_areapos_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_filename = log_filename_prefix + "_areapos.txt";
         log_file1.setFileName(log_filename);
         // open the file
         if (log_file1.open(QIODevice::WriteOnly))
