@@ -24,6 +24,7 @@
 #include <QSignalMapper>
 #include <QFile>
 #include <QDir>
+#include <QCoreApplication>
 
 #define STOP_AFTER 2000
 #define PORT 7001
@@ -141,6 +142,19 @@ QWidget *mykilobotexperiment::createGUI() {
     lay->addWidget(logExp_ckb);
     toggleLogExp(logExp_ckb->isChecked());
 
+    /** Experiment index specification */
+    // Add a field to specify the experiment no
+    QGroupBox * formGroupExpno = new QGroupBox(tr("Exp num"));
+    QFormLayout * layout3 = new QFormLayout;
+    formGroupExpno->setLayout(layout3);
+    QSpinBox* expno_spin = new QSpinBox();
+    expno_spin->setMinimum(1);
+    expno_spin->setMaximum(100);
+    expno_spin->setValue(1);
+    layout3->addRow(new QLabel(tr("Run:")), expno_spin);
+    setExpNumber(expno_spin->value());
+    lay->addWidget(formGroupExpno);
+
     QGroupBox * socketpart = new QGroupBox(tr("Sync field"));
     QVBoxLayout *layout2 = new QVBoxLayout;
     socketpart->setLayout(layout2);
@@ -177,6 +191,7 @@ QWidget *mykilobotexperiment::createGUI() {
     connect(connect_button, SIGNAL(clicked(bool)),this, SLOT(on_pushButton_connect_clicked()));
     connect(send_some, SIGNAL(clicked(bool)),this, SLOT(on_pushButton_send_clicked()));
 
+    connect(expno_spin,SIGNAL(valueChanged(int)),this,SLOT(setExpNumber(int)));
     connect(saveImages_ckb, SIGNAL(toggled(bool)),this, SLOT(toggleSaveImages(bool)));
     connect(logExp_ckb, SIGNAL(toggled(bool)),this, SLOT(toggleLogExp(bool)));
     connect(this,SIGNAL(destroyed(QObject*)), lay, SLOT(deleteLater()));
@@ -211,18 +226,31 @@ void mykilobotexperiment::initialise(bool isResume) {
     // init log file operations
     // if the log checkmark is marked then save the logs
     if(logExp) {
-        /********************************LOG EXPERIMENT***************************************************************************/
-        // open file
-        if(log_file_areas.isOpen()) {
-            // if it was open close and re-open again later
-            // this erase the old content
-            log_file_areas.close();
+
+        QDir log_dir;
+        QString log_foldername =(log_foldername_prefix.arg(m_expno));
+
+
+        if(log_dir.exists(log_foldername)){
+            qWarning() << "WARNING: Log folder already exists";
+            QCoreApplication::quit();
         }
+
+        if (log_dir.mkpath(log_foldername)){
+            qDebug() << "makedir: " << log_foldername;
+        }
+        else{
+            qWarning() << "WARNING: some error occours in makedir LOG folder";
+        }
+
+        /********************************LOG EXPERIMENT***************************************************************************/
         // log filename consist of the prefix and current date and time
-        QString log_filename = log_filename_prefix + "_completedAreas_client_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        QString log_filename = log_foldername+log_filename_prefix + "_completedAreas_client.txt";
         log_file_areas.setFileName(log_filename);
         // open the file
-        if(log_file_areas.open(QIODevice::WriteOnly)) {
+        if ( !log_file_areas.open(QIODevice::WriteOnly) ) { // open file
+            qDebug() << "ERROR(!) in opening file " << log_filename;
+        } else {
             qDebug() << "Log file " << log_file_areas.fileName() << " opened";
             log_stream_areas.setDevice(&log_file_areas);
             log_stream_areas
@@ -233,23 +261,17 @@ void mykilobotexperiment::initialise(bool isResume) {
                     <<"type" << '\t'
                     <<"kilo_on_top" << '\t'
                     <<"kilo_vector" << '\n';
-        } else {
-            qDebug() << "ERROR opening file "<< log_filename;
         }
 
 
         /********************************LOG FOR VIDEO***************************************************************************/
-        // open file
-        if(log_file.isOpen()) {
-            // if it was open close and re-open again later
-            // this erase the old content
-            log_file.close();
-        }
         // log filename consist of the prefix and current date and time
-        log_filename = log_filename_prefix + "_kilopos_client_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_filename = log_foldername+log_filename_prefix + "_kilopos_client.txt";
         log_file.setFileName(log_filename);
         // open the file
-        if(log_file.open(QIODevice::WriteOnly)) {
+        if ( !log_file.open(QIODevice::WriteOnly) ) {
+            qDebug() << "ERROR(!) in opening file " << log_filename;
+        } else {
             qDebug() << "Log file " << log_file.fileName() << " opened";
             log_stream.setDevice(&log_file);
 //            log_stream
@@ -274,22 +296,15 @@ void mykilobotexperiment::initialise(bool isResume) {
             log_stream << endl;
 
         }
-        else {
-            qDebug() << "ERROR opening file "<< log_filename;
-        }
 
 
-        // open file
-        if(log_file1.isOpen()) {
-            // if it was open close and re-open again later
-            // this erase the old content
-            log_file1.close();
-        }
         // log filename consist of the prefix and current date and time
-        log_filename = log_filename_prefix + "_areapos_client_" + QDate::currentDate().toString("yyMMdd") + "_" + QTime::currentTime().toString("hhmmss") + ".txt";
+        log_filename = log_foldername+log_filename_prefix + "_areapos_client.txt";
         log_file1.setFileName(log_filename);
         // open the file
-        if(log_file1.open(QIODevice::WriteOnly)) {
+        if(!log_file1.open(QIODevice::WriteOnly)) {
+            qDebug() << "ERROR(!) in opening file " << log_filename;
+        } else {
             qDebug() << "Log file " << log_file1.fileName() << " opened";
             log_stream1.setDevice(&log_file1);
 //            log_stream1
@@ -315,14 +330,20 @@ void mykilobotexperiment::initialise(bool isResume) {
             }
             log_stream1 << endl;
         }
-        else {
-            qDebug() << "ERROR opening file "<< log_filename;
-        }
     }
 
     // if the checkbox for saving the images is checked
     if(saveImages) {
-        emit saveImage(QString("./images_client/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+        QDir log_dir;
+        QString log_foldername =(log_foldername_prefix.arg(m_expno));
+
+        if(log_dir.exists(log_foldername)){
+            emit saveImage(log_foldername+QString("/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+        }
+        else{
+            qWarning() << "WARNING: LOG dir does not exists";
+            QCoreApplication::quit();
+        }
     }
 
     // clear old drawings (e.g., from ID-identification)
@@ -345,11 +366,11 @@ void mykilobotexperiment::stopExperiment() {
 
 void mykilobotexperiment::run() {
 
-    qDebug() << QString("*********************************************");
-    qDebug() << QString("*********************************************");
-    qDebug() << this->server_address;
-    qDebug() << QString("*********************************************");
-    qDebug() << QString("*********************************************");
+//    qDebug() << QString("*********************************************");
+//    qDebug() << QString("*********************************************");
+//    qDebug() << this->server_address;
+//    qDebug() << QString("*********************************************");
+//    qDebug() << QString("*********************************************");
     //qDebug() << QString("in run");
 
     this->time=m_elapsed_time.elapsed()/1000.0; // time in seconds
@@ -420,7 +441,16 @@ void mykilobotexperiment::run() {
         last_log = this->time;
         if(saveImages) {
             // qDebug() << "Saving Image";
-            emit saveImage(QString("./images_client/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+            QDir log_dir;
+            QString log_foldername =(log_foldername_prefix.arg(m_expno));
+
+            if(log_dir.exists(log_foldername)){
+                emit saveImage(log_foldername+QString("/dhtf_%1.jpg").arg(savedImagesCounter++, 5, 10, QChar('0')));
+            }
+            else{
+                qWarning() << "WARNING: LOG dir does not exists";
+                QCoreApplication::quit();
+            }
         }
         if(logExp)
         {
@@ -618,10 +648,10 @@ void mykilobotexperiment::plotEnvironment() {
     drawCircle(QPoint(k_center.x(),k_center.y()), 10.0, QColor(Qt::black), 10, "", false);
 
     // x and y axis
-    std::vector<cv::Point> xAx {Point(SHIFTX, (ARENA_SIZE*SCALING/2.0)+SHIFTY), Point(SHIFTX+(ARENA_SIZE*SCALING), (ARENA_SIZE*SCALING/2.0)+SHIFTY)};
-    drawLine(xAx,Qt::black, 3,"",false);
-    std::vector<cv::Point> yAx {Point((ARENA_SIZE*SCALING/2.0)+SHIFTX, SHIFTY), Point((ARENA_SIZE*SCALING/2.0)+SHIFTX, SHIFTY+(ARENA_SIZE*SCALING))};
-    drawLine(yAx,Qt::black, 3,"",false);
+    // std::vector<cv::Point> xAx {Point(SHIFTX, (ARENA_SIZE*SCALING/2.0)+SHIFTY), Point(SHIFTX+(ARENA_SIZE*SCALING), (ARENA_SIZE*SCALING/2.0)+SHIFTY)};
+    // drawLine(xAx,Qt::black, 3,"",false);
+    // std::vector<cv::Point> yAx {Point((ARENA_SIZE*SCALING/2.0)+SHIFTX, SHIFTY), Point((ARENA_SIZE*SCALING/2.0)+SHIFTX, SHIFTY+(ARENA_SIZE*SCALING))};
+    // drawLine(yAx,Qt::black, 3,"",false);
     // drawCircle(QPoint(0,0), 30.0, QColor(Qt::yellow), 15, "", false);
     // drawCircle(QPoint(0,2.0*ARENA_CENTER), 30.0, QColor(Qt::yellow), 15, "", false);
     // drawCircle(QPoint(2.0*ARENA_CENTER,0), 30.0, QColor(Qt::yellow), 15, "", false);

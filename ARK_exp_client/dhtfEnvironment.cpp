@@ -275,7 +275,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                     a->kilobots_in_area.push_back(k_id);
 
                 // inside small radius (radius - kilodiameter)
-                if(a->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING / 2))
+                if(a->isInside(kilobot_entity.getPosition(), KILO_DIAMETER/2.0 * SCALING/2.0))
                 {
                     kilobots_states[k_id] = INSIDE_AREA;
 

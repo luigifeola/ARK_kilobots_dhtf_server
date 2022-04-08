@@ -245,7 +245,7 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
             switch (current_state)
             {
             case RANDOM_WALKING:
-              set_color(RGB(0,3,0));
+              set_color(RGB(0,0,0));
               break;
             case WAITING:
               set_color(RGB(0,0,3));
@@ -257,7 +257,7 @@ void rx_message(message_t *msg, distance_measurement_t *d) {
               set_color(RGB(3,0,3));
               break;
             default:
-              set_color(RGB(0,3,0));
+              set_color(RGB(0,0,0));
               break;
             }
         }
@@ -433,7 +433,7 @@ void finite_state_machine(){
                 
                 internal_timeout = 0;
                 current_state = RANDOM_WALKING;
-                set_color(RGB(0,3,0));
+                set_color(RGB(0,0,0));
             }
             /* Timeout condition */
             if(kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
@@ -450,7 +450,7 @@ void finite_state_machine(){
         case LEAVING : {
             if(location == OUTSIDE){
                 current_state = RANDOM_WALKING;
-                set_color(RGB(0,3,0));
+                set_color(RGB(0,0,0));
             }
             break;
         }

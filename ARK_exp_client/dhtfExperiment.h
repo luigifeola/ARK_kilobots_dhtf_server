@@ -114,12 +114,9 @@ public slots:
     void stopExperiment();
 //  void setupExperiment();
 
-    void toggleSaveImages(bool toggle) { 
-        saveImages = toggle; 
-    }
-    void toggleLogExp(bool toggle) {
-        logExp = toggle;
-    }
+    void toggleSaveImages(bool toggle) {saveImages = toggle;}
+    void toggleLogExp(bool toggle) {logExp = toggle;}
+    void setExpNumber(int value){m_expno=value;}
 
     QColor GetFloorColor(int x, int y);
 
@@ -151,11 +148,13 @@ private:
 
 
     // logging variables
+    unsigned int m_expno=0; // Experiment number
     bool saveImages;
     int savedImagesCounter;
     bool logExp;
     QFile log_file_areas;
-    QString log_filename_prefix = "log_dhtf";
+    QString log_filename_prefix = "/log_dhtf";
+    QString log_foldername_prefix = "./MARK_client/run#%1";
     QTextStream log_stream_areas;    
     QFile log_file;
     QFile log_file1;
