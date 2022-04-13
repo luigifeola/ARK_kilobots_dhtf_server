@@ -27,6 +27,7 @@
 #include "area.h"
 
 #define SCALING 0.5
+
 #define SHIFTX 0 //sheffield
 #define SHIFTY 1000 //sheffield
 //#define SHIFTX 500 //cnr

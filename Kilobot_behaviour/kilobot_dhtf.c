@@ -463,7 +463,7 @@ void finite_state_machine(){
           if(kilo_ticks > party_ticks + 10 * to_sec)
           {
             set_motion(FORWARD);
-            set_color(RGB(0,3,0));
+            set_color(RGB(0,0,0));
             current_state = RANDOM_WALKING;
           }
           break;  

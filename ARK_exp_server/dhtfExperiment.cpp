@@ -478,6 +478,15 @@ void mykilobotexperiment::run() {
                 qWarning() << "WARNING: LOG dir does not exists";
                 QCoreApplication::quit();
             }
+
+            QDebug qDeb = qDebug();
+            qDeb << "Ready server tasks:";
+
+            for(Area* a : dhtfEnvironment.areas)
+            {
+                if(a->isReady())
+                    qDeb << "\t" << a->id;
+            }
         }
         if(logExp)
         {

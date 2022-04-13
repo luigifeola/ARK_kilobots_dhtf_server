@@ -19,7 +19,7 @@
 #include <QDebug>
 
 #define SOFT_TASK_COMPLETED 2
-#define HARD_TASK_COMPLETED 6
+#define HARD_TASK_COMPLETED 4
 
 typedef enum
 {

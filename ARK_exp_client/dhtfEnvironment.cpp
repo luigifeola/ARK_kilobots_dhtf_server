@@ -24,6 +24,10 @@ namespace {
     const QVector2D right_direction (-1.0,0.0);
     const double reachable_distance = (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER);
     const int num_sectors = 8;
+    int red_buffer = 0;
+    int blue_buffer = 0;
+    const int red_buffer_max = 20;
+    const int blue_buffer_max = 8;
 }
 
 double mykilobotenvironment::normAngle(double angle){
@@ -223,19 +227,44 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     // update local arrays
     kilobot_id k_id = kilobot_entity.getID();
     this->kilobots_positions[k_id] = kilobot_entity.getPosition();
-
     // update kilobot led colour (indicates the internal state of the kb)
     lightColour kb_colour = kilobot_entity.getLedColour();
-    if(kb_colour == lightColour::RED){
-        this->kilobots_colours[k_id] = Qt::red;     // kilobot in LEAVING
-    }
-    else if(kb_colour == lightColour::BLUE){
-        this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
+
+    if(this->kilobots_colours[k_id] == Qt::black)
+    {
+        if(kb_colour == lightColour::BLUE)
+        {
+            this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
+        }
     }
     else
     {
-        this->kilobots_colours[k_id] = Qt::black;   // random walking
+        if(kb_colour == lightColour::RED)
+        {
+            red_buffer++;
+            blue_buffer = 0;
+            if(red_buffer >= red_buffer_max)
+            {
+                this->kilobots_colours[k_id] = Qt::red;     // kilobot in LEAVING
+                red_buffer = 0;
+            }
+        }
+        else if(kb_colour == lightColour::RED)
+        {
+            blue_buffer++;
+            red_buffer = 0;
+            if(blue_buffer >= blue_buffer_max)
+            {
+                this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
+                blue_buffer = 0;
+            }
+        }
+        else
+        {
+            this->kilobots_colours[k_id] = Qt::black;   // random walking
+        }
     }
+
 
 
 
@@ -275,7 +304,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                     a->kilobots_in_area.push_back(k_id);
 
                 // inside small radius (radius - kilodiameter)
-                if(a->isInside(kilobot_entity.getPosition(), KILO_DIAMETER/2.0 * SCALING/2.0))
+                if(a->isInside(kilobot_entity.getPosition(), (KILO_DIAMETER/2.0) * (SCALING/2.0)))
                 {
                     kilobots_states[k_id] = INSIDE_AREA;
 
@@ -454,11 +483,9 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
 
     }
+}
 
 #endif // DHTFENVIRONMENT_CPP
-
-
-}
 
 
 
