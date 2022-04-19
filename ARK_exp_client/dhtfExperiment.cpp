@@ -60,7 +60,12 @@ mykilobotexperiment::mykilobotexperiment() {
 
 void mykilobotexperiment::receivedSomething(QString msg)
 {
-    qDebug() << QString("Received from server: %1").arg(msg);
+    if(!(msg.startsWith("A")))
+    {
+        qDebug() << QString("Received from server: %1").arg(msg) << this->time;
+    }
+
+
     dhtfEnvironment.receive_buffer = msg;
 //    if(msg.startsWith("I"))
 //        qDebug() <<"startsWith IIIIIIIIIIIIIIIIIIIIII";
@@ -92,7 +97,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToServer(QString msg)
 {
-    qDebug() << QString("Sending to server: %1").arg(msg);
+    qDebug() << QString("Sending__to___the_server: %1").arg(msg) << this->time;
     QByteArray ba = msg.toLocal8Bit();
     const char *c_str2 = ba.data();
     client->tcpSocket->write(c_str2);
@@ -246,14 +251,14 @@ void mykilobotexperiment::initialise(bool isResume) {
         /********************************LOG EXPERIMENT***************************************************************************/
         // log filename consist of the prefix and current date and time
         QString log_filename = log_foldername+log_filename_prefix + "_completedAreas_client.txt";
-        log_file_areas.setFileName(log_filename);
+        log_file_completed_areas.setFileName(log_filename);
         // open the file
-        if ( !log_file_areas.open(QIODevice::WriteOnly) ) { // open file
+        if ( !log_file_completed_areas.open(QIODevice::WriteOnly) ) { // open file
             qDebug() << "ERROR(!) in opening file " << log_filename;
         } else {
-            qDebug() << "Log file " << log_file_areas.fileName() << " opened";
-            log_stream_areas.setDevice(&log_file_areas);
-            log_stream_areas
+            qDebug() << "Log file " << log_file_completed_areas.fileName() << " opened";
+            log_stream_completed.setDevice(&log_file_completed_areas);
+            log_stream_completed
                     << "time" << '\t'
                     << "id" << '\t'
                     << "creation" << '\t'
@@ -267,14 +272,14 @@ void mykilobotexperiment::initialise(bool isResume) {
         /********************************LOG FOR VIDEO***************************************************************************/
         // log filename consist of the prefix and current date and time
         log_filename = log_foldername+log_filename_prefix + "_kilopos_client.txt";
-        log_file.setFileName(log_filename);
+        log_file_kilobots.setFileName(log_filename);
         // open the file
-        if ( !log_file.open(QIODevice::WriteOnly) ) {
+        if ( !log_file_kilobots.open(QIODevice::WriteOnly) ) {
             qDebug() << "ERROR(!) in opening file " << log_filename;
         } else {
-            qDebug() << "Log file " << log_file.fileName() << " opened";
-            log_stream.setDevice(&log_file);
-//            log_stream
+            qDebug() << "Log file " << log_file_kilobots.fileName() << " opened";
+            log_stream_kilobots.setDevice(&log_file_kilobots);
+//            log_stream_kilobots
 //                    << "time" << '\t'
 //                    << "kID" << '\t'
 //                    << "colour" << '\t'
@@ -283,9 +288,9 @@ void mykilobotexperiment::initialise(bool isResume) {
 //                    << "orientation" << '\t'
 //                    << "state" << '\n';
             //Initial state
-           log_stream << this->time;
+           log_stream_kilobots << this->time;
            for(int i=0; i<kilobots.size();i++){
-                log_stream << "\t"
+                log_stream_kilobots << "\t"
                            << kilobots[i].id << '\t'
                            << kilobots[i].colour << '\t'
                            << kilobots[i].position.x() << '\t'
@@ -293,21 +298,21 @@ void mykilobotexperiment::initialise(bool isResume) {
                            << kilobots[i].orientation <<'\t'
                            << kilobots[i].state;
             }
-            log_stream << endl;
+            log_stream_kilobots << endl;
 
         }
 
 
         // log filename consist of the prefix and current date and time
         log_filename = log_foldername+log_filename_prefix + "_areapos_client.txt";
-        log_file1.setFileName(log_filename);
+        log_file_areas.setFileName(log_filename);
         // open the file
-        if(!log_file1.open(QIODevice::WriteOnly)) {
+        if(!log_file_areas.open(QIODevice::WriteOnly)) {
             qDebug() << "ERROR(!) in opening file " << log_filename;
         } else {
-            qDebug() << "Log file " << log_file1.fileName() << " opened";
-            log_stream1.setDevice(&log_file1);
-//            log_stream1
+            qDebug() << "Log file " << log_file_areas.fileName() << " opened";
+            log_stream_areas.setDevice(&log_file_areas);
+//            log_stream_areas
 //                    << "time" << '\t'
 //                    << "id" << '\t'
 //                    << "positionX" << '\t'
@@ -316,10 +321,10 @@ void mykilobotexperiment::initialise(bool isResume) {
 //                    << "state" << '\t'
 //                    << "kilobots_in_area" << '\n';
             //Initial state
-            log_stream1 << this->time;
+            log_stream_areas << this->time;
             for(Area* a : dhtfEnvironment.areas)
             {
-                log_stream1 << '\t'
+                log_stream_areas << '\t'
                             << a->id << '\t'
                             << a->position.x() << '\t'
                             << a->position.y() << '\t'
@@ -328,7 +333,7 @@ void mykilobotexperiment::initialise(bool isResume) {
                             << a->kilobots_in_area.size();
 
             }
-            log_stream1 << endl;
+            log_stream_areas << endl;
         }
     }
 
@@ -353,14 +358,14 @@ void mykilobotexperiment::initialise(bool isResume) {
 void mykilobotexperiment::stopExperiment() {
 
     //Close Log file
+    if (log_file_kilobots.isOpen()){
+        log_file_kilobots.close();
+    }
     if (log_file_areas.isOpen()){
         log_file_areas.close();
     }
-    if (log_file.isOpen()){
-        log_file.close();
-    }
-    if (log_file1.isOpen()){
-        log_file1.close();
+    if (log_file_completed_areas.isOpen()){
+        log_file_completed_areas.close();
     }
 }
 
@@ -400,7 +405,9 @@ void mykilobotexperiment::run() {
         {
             last_ARK_message = this->time;
             // WARNING: be carefull thant buffer is sent when is of active areas size + 1
+            qDebug() << QString("Received_from_the_server: %1").arg(dhtfEnvironment.receive_buffer_backup) << this->time;
             sendToServer(dhtfEnvironment.send_buffer);
+            qDebug() << " ";
             dhtfEnvironment.send_buffer.clear();
         }
     }
@@ -454,10 +461,10 @@ void mykilobotexperiment::run() {
         }
         if(logExp)
         {
-            log_stream << this->time;
+            log_stream_kilobots << this->time;
             for(int i=0; i<kilobots.size();i++)
             {
-                 log_stream << "\t"
+                 log_stream_kilobots << "\t"
                             << kilobots[i].id << '\t'
                             << kilobots[i].colour << '\t'
                             << kilobots[i].position.x() << '\t'
@@ -465,12 +472,12 @@ void mykilobotexperiment::run() {
                             << kilobots[i].orientation <<'\t'
                             << kilobots[i].state;
             }
-            log_stream << endl;
+            log_stream_kilobots << endl;
 
-            log_stream1 << this->time;
+            log_stream_areas << this->time;
             for(Area* a : dhtfEnvironment.areas)
             {
-                log_stream1 << '\t'
+                log_stream_areas << '\t'
                             << a->id << '\t'
                             << a->position.x() << '\t'
                             << a->position.y() << '\t'
@@ -479,7 +486,7 @@ void mykilobotexperiment::run() {
                             << a->kilobots_in_area.size();
 
             }
-            log_stream1 << endl;
+            log_stream_areas << endl;
 
         }
     }
@@ -487,30 +494,30 @@ void mykilobotexperiment::run() {
 
     // save log for areas
     if(logExp) {
-        if(dhtfEnvironment.saveLOG)
+        while(!dhtfEnvironment.completed_areas.isEmpty())
         {
-            dhtfEnvironment.saveLOG = false;
-            qDebug() << "LOG_EXP: saving at " << this->time*10;
+//            qDebug() << "LOG_EXP: saving at " << this->time*10;
 
+            Area* completed_area = dhtfEnvironment.completed_areas.takeFirst();
 
-            log_stream_areas
+            log_stream_completed
                        << this->time << '\t'
-                       << dhtfEnvironment.completed_area->id << '\t'
-                       << dhtfEnvironment.completed_area->creation_time << '\t'
-                       << dhtfEnvironment.completed_area->completed_time << '\t'
-                       << int(dhtfEnvironment.completed_area->type) << '\t'
-                       << dhtfEnvironment.completed_area->kilobots_in_area.size()<< '\t';
+                       << completed_area->id << '\t'
+                       << completed_area->creation_time << '\t'
+                       << completed_area->completed_time << '\t'
+                       << int(completed_area->type) << '\t'
+                       << completed_area->kilobots_in_area.size()<< '\t';
 
-            for(int i=0; i<dhtfEnvironment.completed_area->kilobots_in_area.size(); i++)
+            for(int i=0; i<completed_area->kilobots_in_area.size(); i++)
             {
-                log_stream_areas << dhtfEnvironment.completed_area->kilobots_in_area.at(i);
-                if(i< dhtfEnvironment.completed_area->kilobots_in_area.size() - 1)
+                log_stream_completed << completed_area->kilobots_in_area.at(i);
+                if(i < completed_area->kilobots_in_area.size() - 1)
                 {
-                    log_stream_areas <<",";
+                    log_stream_completed <<",";
                 }
             }
 
-            log_stream_areas << endl;
+            log_stream_completed << endl;
         }
 
 

@@ -26,7 +26,7 @@ namespace {
     const int num_sectors = 8;
     int red_buffer = 0;
     int blue_buffer = 0;
-    const int red_buffer_max = 20;
+    const int red_buffer_max = 15;
     const int blue_buffer_max = 8;
 }
 
@@ -77,7 +77,6 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
     this->ArenaX = 0.45;
     this->ArenaY = 0.45;
 
-    this->saveLOG = false;
     this->send_buffer = "";
     this->receive_buffer = "";
 
@@ -145,6 +144,7 @@ void mykilobotenvironment::reset(){
     this->minTimeBetweenTwoMsg = 0;
 
     areas.clear();
+    completed_areas.clear();
     kilobots_states.clear();
     kilobots_states_LOG.clear();
 
@@ -346,7 +346,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     for(int i=0; i<areas.size(); i++)
     {
 
-        if( areas[i]->isCompleted(this->time, this->completed_area, ready[i]) || (areas[i]->completed) )
+        if( areas[i]->isCompleted(this->time, ready[i]) || (areas[i]->completed) )
         {
             // qDebug() << "Real area";
             // areas[i]->PrintArea();
@@ -354,10 +354,15 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // qDebug() << "********copied area********";
             // this->completed_area->PrintArea();
 
-            if(std::fabs(this->time - this->completed_area->completed_time) < 0.000001)
+            if(areas[i]->party_message_sent == false)
             {
-                qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
-                for(uint k : this->completed_area->kilobots_in_area)
+                areas[i]->party_message_sent = true;
+                Area* completed_area (areas[i]);
+                this->completed_areas.push_back(completed_area);
+
+                qDebug() << "Kilo on area " << completed_area->kilobots_in_area
+                         << "time:" << this->time;
+                for(uint k : completed_area->kilobots_in_area)
                 {
                     if(k == k_id)
                     {
@@ -365,13 +370,12 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                         party_message.id = k;
                         party_message.type = PARTY;
                         party_message.data = 0;
-                        qDebug() << "time:"<<this->time << " ARK PARTY MESSAGE to " << k;
+                        qDebug() << "time:"<<this->time
+                                 << " ARK PARTY MESSAGE to " << k;
                         lastSent[k] = this->time;
                         emit transmitKiloState(party_message);
                     }
                 }
-
-                this->saveLOG = true;
             }
 
             if(!areas[i]->Respawn(this->time))

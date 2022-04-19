@@ -154,14 +154,14 @@ private:
     bool saveImages;
     int savedImagesCounter;
     bool logExp;
-    QFile log_file_areas;
     QString log_filename_prefix = "/log_dhtf";
     QString log_foldername_prefix = "./MARK_server/run#%1";
+    QFile log_file_kilobots;
+    QFile log_file_areas;
+    QFile log_file_completed_areas;
+    QTextStream log_stream_kilobots;
+    QTextStream log_stream_completed;
     QTextStream log_stream_areas;
-    QFile log_file;
-    QFile log_file1;
-    QTextStream log_stream;
-    QTextStream log_stream1;
 
     float log_period = 1.0;
     float last_log = 0.0;

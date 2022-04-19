@@ -26,8 +26,8 @@ namespace {
     const int num_sectors = 8;
     int red_buffer = 0;
     int blue_buffer = 0;
-    const int red_buffer_max = 20;
-    const int blue_buffer_max = 8;
+    const int red_buffer_max = 0;
+    const int blue_buffer_max = 0;
 }
 
 double mykilobotenvironment::normAngle(double angle){
@@ -76,7 +76,6 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
     this->ArenaX = 0.45;
     this->ArenaY = 0.45;
 
-    this->saveLOG = false;
     this->send_buffer = "";
     this->receive_buffer = "";
     this->initialised = false;
@@ -148,6 +147,7 @@ void mykilobotenvironment::reset(){
     this->minTimeBetweenTwoMsg = 0;
 
     areas.clear();
+    completed_areas.clear();
     kilobots_states.clear();
     kilobots_states_LOG.clear();
 
@@ -176,6 +176,7 @@ void mykilobotenvironment::update() {
 
     else if(receive_buffer.startsWith("A"))
     {
+        receive_buffer_backup = receive_buffer;
         receive_buffer.remove(0,1);
         QVector<int> completed(areas.size(),0);
         for(int i=0; i<receive_buffer.size(); i++){
@@ -184,21 +185,23 @@ void mykilobotenvironment::update() {
             {
                 if(completed[i] == 1)
                 {
-                     areas[i]->set_completed(this->time, this->completed_area);
+                    areas[i]->set_completed(this->time);
+                    Area* completed_area (areas[i]);
+                    this->completed_areas.push_back(completed_area);
 
-                     qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
-                     for(uint k : this->completed_area->kilobots_in_area)
-                     {
-                         kilobot_message party_message;
-                         party_message.id = k;
-                         party_message.type = PARTY;
-                         party_message.data = 0;
-                         lastSent[k] = this->time;
-                         qDebug() << "time:" << this->time << " ARK PARTY MESSAGE to " << k ;
-                         emit transmitKiloState(party_message);
-                     }
-
-                     this->saveLOG = true;
+                    qDebug() << "***************************************";
+                    for(uint k : completed_area->kilobots_in_area)
+                    {
+                        kilobot_message party_message;
+                        party_message.id = k;
+                        party_message.type = PARTY;
+                        party_message.data = 0;
+                        lastSent[k] = this->time;
+                        qDebug() << "time:" << this->time
+                                 << " ARK PARTY MESSAGE to " << k ;
+                        emit transmitKiloState(party_message);
+                    }
+                    qDebug() << "***************************************";
                 }
                 else
                 {

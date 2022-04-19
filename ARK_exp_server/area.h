@@ -32,13 +32,13 @@ class Area
 public:
     uint id; // area id (0...15)
     uint8_t type; //hard or soft task, i.e. RED or BLUE
-    // uint8_t other_type; /* hard or soft task on the other side */
 
     QPointF position; /* Center of the task */
     double radius; /* Radius of the circle to plot */
     QColor color; /* Color used to represent the area */
     QVector<uint> kilobots_in_area; /* keep counts of how many kbs are in the area*/
     bool completed;  /* Flag to understand if the task is accomplished or not */
+    bool party_message_sent; /* Flag to check if kilobots_in_area received the area completion message */
     double respawn_timer; /* Time needed to the area to respawn */
     double creation_time; /* Time at which the area is created/respawned */
     double completed_time; /* Time at which the area is completed */
@@ -53,6 +53,7 @@ public:
     {
         this->creation_time = 0.0;
         this->completed = false;
+        this->party_message_sent = false;
         this->kilobots_in_area.clear();
 
         this->respawn_timer = 40;
@@ -78,6 +79,14 @@ public:
             
     }
 
+    Area(const Area & a1) : kilobots_in_area(a1.kilobots_in_area)
+    {
+        this->id = a1.id;
+        this->type = a1.type;
+        this->creation_time = a1.creation_time;
+        this->completed_time = a1.completed_time;
+    }
+
 
     /* destructor */
     ~Area(){}
@@ -94,7 +103,7 @@ public:
     }
 
     // check if on top of the area there are the right amount of kilobots, so remove the area from the completable task
-    bool isCompleted(double kTime, Area* a_copy, int ready)
+    bool isCompleted(double kTime, int ready)
     {
         if(ready)
         {
@@ -102,11 +111,7 @@ public:
                 (this->type == SOFT_TASK && kilobots_in_area.size() >= SOFT_TASK_COMPLETED))
             {
                 this->completed_time = kTime;
-                *a_copy = *this;
                 this->completed = true;
-                // this->color = Qt::transparent;
-                this->kilobots_in_area.clear();
-
             }
         }
 
@@ -118,7 +123,6 @@ public:
         this->completed_time = kTime;
         *a_copy = *this;
         this->completed = true;
-        this->kilobots_in_area.clear();
     }
 
 
@@ -127,6 +131,7 @@ public:
         if(kTime - this->completed_time > this->respawn_timer)
         {
             this->completed = false;
+            this->party_message_sent = false;
             this->kilobots_in_area.clear();
             this->creation_time = kTime;
             this->completed_time = 0.0;
@@ -139,6 +144,7 @@ public:
     void received_Respawn(double kTime)
     {
         this->completed = false;
+        this->party_message_sent = false;
         this->kilobots_in_area.clear();
         this->creation_time = kTime;
         this->completed_time = 0.0;
