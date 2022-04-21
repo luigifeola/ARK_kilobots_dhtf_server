@@ -33,7 +33,6 @@ double mykilobotenvironment::normAngle(double angle){
 }
 
 QVector2D mykilobotenvironment::VectorRotation2D (double angle, QVector2D vec){
-    // qDebug() << "2D Rotation";
     QVector2D rotated_vector;
     double kx = (cos(angle)* vec.x()) + (-1.0*sin(angle) * vec.y());
     double ky = (sin(angle) * vec.x()) + (cos(angle) * vec.y());
@@ -73,7 +72,6 @@ mykilobotenvironment::mykilobotenvironment(QObject *parent) : KilobotEnvironment
     this->ArenaX = 0.45;
     this->ArenaY = 0.45;
 
-    this->saveLOG = false;
     this->send_buffer = "";
     this->receive_buffer = "";
 
@@ -141,6 +139,7 @@ void mykilobotenvironment::reset(){
     this->minTimeBetweenTwoMsg = 0;
 
     areas.clear();
+    completed_areas.clear();
     kilobots_states.clear();
     kilobots_states_LOG.clear();
 
@@ -265,7 +264,62 @@ void mykilobotenvironment::reset(){
 
 // Only update if environment is dynamic:
 void mykilobotenvironment::update() {
-    //eventualmente sarà qui che gestirai il completamento delle aree
+
+
+    // recover ready areas from client side
+    QVector<int> ready(areas.size(),0);
+    if(receive_buffer.startsWith("T")){
+        receive_buffer.remove(0,1); // remove the "T"
+        for(int i=0; i<receive_buffer.size(); i++){
+            ready[i] = QString(receive_buffer[i]).toInt();
+        }
+        receive_buffer.clear();
+    }
+
+    for(int i=0; i<areas.size(); i++)
+    {
+
+        if( areas[i]->isCompleted(this->time, ready[i]) || (areas[i]->completed) )
+        {
+            if(areas[i]->party_message_sent == false)
+            {
+                areas[i]->party_message_sent = true;
+                Area* completed_area (areas[i]);
+                this->completed_areas.push_back(completed_area);
+
+                qDebug() << "***************************************";
+                qDebug() << "Completed area" << completed_area->id;
+
+                if(completed_area->kilobots_in_area.empty()){
+                    qDebug() << "WARNING!!!!! A completed area has no kilobots on top";
+                    qDebug() << "receive_buffer:" << receive_buffer;
+                    completed_area->PrintArea();
+
+                }
+
+                for(uint k : completed_area->kilobots_in_area)
+                {
+                    kilobot_message party_message;
+                    party_message.id = k;
+                    party_message.type = PARTY;
+                    party_message.data = 0;
+                    lastSent[k] = this->time;
+                    qDebug() << "time:"<<this->time
+                                << " ARK PARTY MESSAGE to " << k;
+                    emit transmitKiloState(party_message);
+                }
+            }
+
+            if(!areas[i]->Respawn(this->time))
+                continue;
+            else
+            {
+                qDebug() << "Respawned area" << areas[i]->id;
+            }
+        }
+    }
+
+    // prepare the massage to send to the client
     send_buffer = "A";
     for(int i = 0; i < areas.size(); i++)
     {
@@ -279,13 +333,11 @@ void mykilobotenvironment::update() {
 
 
 // generate virtual sensors reading and send it to the kbs (same as for ARGOS)
-void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {   
-    // qDebug() << QString("In updateVirtualSensor");
+void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {  
     // update local arrays
     kilobot_id k_id = kilobot_entity.getID();
     this->kilobots_positions[k_id] = kilobot_entity.getPosition();
 
-    // qDebug() << QString("saving colours");
     // update kilobot led colour (indicates the internal state of the kb)
     lightColour kb_colour = kilobot_entity.getLedColour();
     if(kb_colour == lightColour::RED){
@@ -300,18 +352,8 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     }
 
 
-    // ready areas from client side
-    QVector<int> ready(areas.size(),0);
 
-
-    if(receive_buffer.startsWith("T")){
-        receive_buffer.remove(0,1); // remove the "T"
-        for(int i=0; i<receive_buffer.size(); i++){
-            ready[i] = QString(receive_buffer[i]).toInt();
-        }
-    }
-
-    // check if inside
+    // check if a kilobot is inside an area
 
     bool found = false;
     int timer_to_send = 0;
@@ -320,45 +362,16 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     for(int i=0; i<areas.size(); i++)
     {
 
-        if( areas[i]->isCompleted(this->time, this->completed_area, ready[i]) || (areas[i]->completed) )
+        if(areas[i]->completed)
         {
-            // qDebug() << "Real area";
-            // areas[i]->PrintArea();
-
-            // qDebug() << "********copied area********";
-            // this->completed_area->PrintArea();
-
-            if(std::fabs(this->time - this->completed_area->completed_time) < 0.000001)
-            {
-                // qDebug() << "Kilo on area " << this->completed_area->kilobots_in_area << "time:" << this->time;
-                for(uint k : this->completed_area->kilobots_in_area)
-                {
-                    if(k == k_id)
-                    {
-                        kilobot_message party_message;
-                        party_message.id = k;
-                        party_message.type = PARTY;
-                        party_message.data = 0;
-                        qDebug() << "time:"<<this->time << " ARK PARTY MESSAGE to " << k;
-                        lastSent[k] = this->time;
-                        emit transmitKiloState(party_message);
-                    }
-                }
-
-                this->saveLOG = true;
-            }
-
-            if(!areas[i]->Respawn(this->time))
-                continue;
+            continue;
         }
-
-
 
         // inside bigger radius (radius)
         if(areas[i]->isInside(kilobot_entity.getPosition()))
         {
 
-            if(kilobots_colours[k_id] == Qt::red || kilobots_states[k_id] == LEAVING)
+            if(kilobots_colours[k_id] == Qt::red)
             {
                 kilobots_states[k_id] = LEAVING;
                 areas[i]->kilobots_in_area.erase(std::remove(areas[i]->kilobots_in_area.begin(), areas[i]->kilobots_in_area.end(), k_id),
@@ -397,7 +410,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
     }
 
-    // if in no area
+    // if outside all areas
     if(!found)
     {
         if(kilobots_states[k_id] == RANDOM_WALK)

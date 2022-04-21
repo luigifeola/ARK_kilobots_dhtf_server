@@ -146,20 +146,19 @@ private:
     mykilobotenvironment dhtfEnvironment;
     QTime m_elapsed_time;
 
-
     // logging variables
     unsigned int m_expno=0; // Experiment number
     bool saveImages;
     int savedImagesCounter;
     bool logExp;
-    QFile log_file_areas;
     QString log_filename_prefix = "/log_dhtf";
     QString log_foldername_prefix = "./MARK_client/run#%1";
-    QTextStream log_stream_areas;    
-    QFile log_file;
-    QFile log_file1;
-    QTextStream log_stream;
-    QTextStream log_stream1;
+    QFile log_file_kilobots;
+    QFile log_file_areas;
+    QFile log_file_completed_areas;
+    QTextStream log_stream_kilobots;
+    QTextStream log_stream_areas;
+    QTextStream log_stream_completed;
 
     float log_period = 1.0;
     float last_log = 0.0;

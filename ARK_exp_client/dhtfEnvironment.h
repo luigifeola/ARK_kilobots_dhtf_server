@@ -59,8 +59,7 @@ public:
     QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate the state of the kilobot
 
     QVector<Area*> areas;   // list of all areas present in the experiment
-    Area* completed_area = new Area(1000, 0, 0, QPointF(1000.0,1000.0),200.0); // random values
-
+    QVector<Area*> completed_areas;
     QVector<float> lastSent;    // when the last message was sent to the kb at given position
 
 
@@ -68,7 +67,6 @@ public:
 
     float minTimeBetweenTwoMsg; // minimum time between two messages
     double time;
-    bool saveLOG;
     QString send_buffer;
     QString receive_buffer;
     bool initialised;
