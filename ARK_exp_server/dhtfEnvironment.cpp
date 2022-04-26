@@ -24,10 +24,19 @@ namespace {
     const QVector2D right_direction (-1.0,0.0);
     const double reachable_distance = (ARENA_SIZE*SCALING/2) - (2*KILO_DIAMETER);
     const int num_sectors = 8;
+
     int red_buffer = 0;
     int blue_buffer = 0;
-    const int red_buffer_max = 15;
-    const int blue_buffer_max = 5;
+    const int red_buffer_max = 5;
+    const int blue_buffer_max = 2;
+
+    const bool test_ARK_msgs = false;
+    QString kilo_state_str = " ";
+    QString kilo_col_str = " ";
+
+    const QColor INSIDE_COLOUR = Qt::black;
+    const QColor LEAVING_COLOUR = Qt::red;
+    const QColor WALKING_COLOUR = Qt::blue;
 }
 
 double mykilobotenvironment::normAngle(double angle){
@@ -283,43 +292,46 @@ void mykilobotenvironment::update() {
     for(int i=0; i<areas.size(); i++)
     {
 
-        if( areas[i]->isCompleted(this->time, ready[i]) || (areas[i]->completed) )
+        if(areas[i]->isCompleted(ready[i]) && areas[i]->completed == false )
         {
-            if(areas[i]->party_message_sent == false)
-            {
-                areas[i]->party_message_sent = true;
-                Area* completed_area (areas[i]);
-                this->completed_areas.push_back(completed_area);
+            areas[i]->set_completed(this->time);
+            Area completed_area = *areas[i];
+            this->completed_areas.push_back(completed_area);
 
-                qDebug() << "***************************************";
-                qDebug() << "Completed area" << completed_area->id;
+            qDebug() << "***************************************";
+            qDebug() << "Completed area: id" << completed_area.id
+                     << ", completed time " << completed_area.completed_time
+                     << ", kilobot on top " << completed_area.kilobots_in_area.size();
 
-                if(completed_area->kilobots_in_area.empty()){
-                    qDebug() << "WARNING!!!!! A completed area has no kilobots on top";
-                    qDebug() << "receive_buffer:" << receive_buffer;
-                    completed_area->PrintArea();
+            if(completed_area.kilobots_in_area.empty()){
+                qDebug() << "WARNING!!!!! A completed area has no kilobots on top";
+                qDebug() << "receive_buffer:" << receive_buffer;
+                completed_area.PrintArea();
 
-                }
-
-                for(uint k : completed_area->kilobots_in_area)
-                {
-                    kilobot_message party_message;
-                    party_message.id = k;
-                    party_message.type = PARTY;
-                    party_message.data = 0;
-                    lastSent[k] = this->time;
-                    qDebug() << "time:"<<this->time
-                                << " ARK PARTY MESSAGE to " << k;
-                    emit transmitKiloState(party_message);
-                }
             }
 
-            if(!areas[i]->Respawn(this->time))
-                continue;
-            else
+            for(uint k : completed_area.kilobots_in_area)
             {
-                qDebug() << "Respawned area" << areas[i]->id;
+                kilobot_message party_message;
+                party_message.id = k;
+                party_message.type = PARTY;
+                party_message.data = 0;
+                lastSent[k] = this->time;
+                qDebug() << "time:" << this->time
+                            << "ARK PARTY MESSAGE to " << k;
+                emit transmitKiloState(party_message);
             }
+            qDebug() << "***************************************";
+        }
+
+        if(areas[i]->completed == true && areas[i]->Respawn(this->time))
+        {
+            qDebug() << " ";
+            qDebug() << "************";
+            qDebug() << "Respawned area" << areas[i]->id;
+            qDebug() << "************";
+            qDebug() << " ";
+            areas[i]->received_Respawn(this->time);
         }
     }
 
@@ -344,39 +356,15 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
     // update kilobot led colour (indicates the internal state of the kb)
     lightColour kb_colour = kilobot_entity.getLedColour();
-    if(this->kilobots_colours[k_id] == Qt::black)
-    {
-        if(kb_colour == lightColour::BLUE)
-        {
-            this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
-        }
+
+    if(kb_colour == lightColour::RED){
+        this->kilobots_colours[k_id] = LEAVING_COLOUR;     // kilobot in LEAVING
     }
-    else
-    {
-        if(kb_colour == lightColour::RED)
-        {
-            red_buffer++;
-            blue_buffer = 0;
-            if(red_buffer >= red_buffer_max)
-            {
-                this->kilobots_colours[k_id] = Qt::red;     // kilobot in LEAVING
-                red_buffer = 0;
-            }
-        }
-        else if(kb_colour == lightColour::RED)
-        {
-            blue_buffer++;
-            red_buffer = 0;
-            if(blue_buffer >= blue_buffer_max)
-            {
-                this->kilobots_colours[k_id] = Qt::blue;    // kilobot in WAITING
-                blue_buffer = 0;
-            }
-        }
-        else
-        {
-            this->kilobots_colours[k_id] = Qt::black;   // random walking
-        }
+    else if(kb_colour == lightColour::BLUE){
+        this->kilobots_colours[k_id] = WALKING_COLOUR;    // kilobot in RANDOM_WALK
+    }
+    else{
+        this->kilobots_colours[k_id] = INSIDE_COLOUR;   // kilobot in WORKING
     }
 
 
@@ -392,6 +380,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
 
         if(areas[i]->completed)
         {
+            areas[i]->kilobots_in_area.clear();
             continue;
         }
 
@@ -418,14 +407,12 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 if(areas[i]->isInside(kilobot_entity.getPosition(), KILO_DIAMETER * SCALING / 2))
                 {
                     kilobots_states[k_id] = INSIDE_AREA;
-
                     timer_to_send = areas[i]->waiting_timer / 10;
                 }
 
                 found = true;
                 break;
             }
-
         }
         // outside
         // NOTE: if kilobot passes from blue to black you should remove it from the area position
@@ -441,17 +428,43 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
     // if outside all areas
     if(!found)
     {
-        if(kilobots_states[k_id] == RANDOM_WALK)
-            kilobots_states_LOG[k_id] = kilobots_states[k_id];
-        kilobots_states_LOG[k_id] = kilobots_states[k_id];
         kilobots_states[k_id] = RANDOM_WALK;
     }
 
+    if(test_ARK_msgs)
+    {
+        switch (kilobots_states[k_id]) {
+        case RANDOM_WALK:
+            kilo_state_str = "RANDOM_WALK";
+            break;
+        case INSIDE_AREA:
+            kilo_state_str = "INSIDE_AREA";
+            break;
+        case LEAVING:
+            kilo_state_str = "LEAVING";
+            break;
+        default:
+            kilo_state_str = "WARNING NO STATE";
+            break;
+        }
 
-    // qDebug() <<QString("Kilobot %1 state is: %2").arg(k_id).arg(kilobots_states[k_id]);
-    // qDebug() <<QString("Kilobot %1 LOG state is: %2").arg(k_id).arg(kilobots_states_LOG[k_id]);
 
-
+        if(this->kilobots_colours[k_id] == Qt::red)
+        {
+            kilo_col_str = "red";
+        }
+        else if(this->kilobots_colours[k_id] == Qt::blue)
+        {
+            kilo_col_str = "blue";
+        }
+        else if(this->kilobots_colours[k_id] == Qt::black)
+        {
+            kilo_col_str = "black";
+        }
+        else{
+            kilo_col_str = "WARNING COLOUR";
+        }
+    }
 
     // now we have everything up to date and everything we need
     // then if it is time to send the message to the kilobot send info to the kb
@@ -487,11 +500,11 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
         // get position translated w.r.t. center of arena
         QVector2D k_pos = QVector2D(this->kilobots_positions[k_id]);
         QVector2D shifted_pos((k_pos.x() - k_center.x()), -1.0*(k_pos.y() - k_center.y()) );
-        // qDebug() << "pos:" << k_pos.x() << ' ' << k_pos.y() << "\tShifted:" << shifted_pos.x() << ' ' <<  shifted_pos.y();
+        // qDebug() << "pos:" << k_pos.x() << ' ' << k_pos.y() << " Shifted:" << shifted_pos.x() << ' ' <<  shifted_pos.y();
 
 
-
-        if( (kilobots_states[k_id] == INSIDE_AREA) /*&& kilobots_colours[k_id] != Qt::blue*/)
+        // whenever a kilobot is inside an area send the INSIDE_AREA message
+        if( (kilobots_states[k_id] == INSIDE_AREA) &&  this->kilobots_colours[k_id] != INSIDE_COLOUR)
         {
             message.id = k_id;
             message.type = INSIDE_AREA;   // sending inside to the kilobot
@@ -500,14 +513,17 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
+            if(test_ARK_msgs)
+                qDebug() <<QString("%4  kID %1 state is: %2  colour is: %3  msg: %5").arg(k_id).arg(kilo_state_str).arg(kilo_col_str).arg(this->time).arg("INSIDE");
         }
 
+        // whenever a kilobot is near the walls append to the message the proximity sensor reading
         else if( abs(shifted_pos.x()) > reachable_distance ||
                  abs(shifted_pos.y()) > reachable_distance )
         {
             // qDebug() << " COLLISION for kilobot " << k_id << " in position "<< kilobots_positions[k_id].x() << " " << kilobots_positions[k_id].y()
-            //                                                             << " orientation " << qAtan2(QVector2D(kilobot_entity.getVelocity()).y(), QVector2D(kilobot_entity.getVelocity()).x());
-            // get position translated w.r.t. center of arena
+            //          << " orientation " << qAtan2(QVector2D(kilobot_entity.getVelocity()).y(), QVector2D(kilobot_entity.getVelocity()).x());
+
 
 
             // get orientation (from velocity)
@@ -523,7 +539,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                      << normAngle( qRadiansToDegrees(qAtan2(shifted_pos.y(), shifted_pos.x())) ) ;
                      << normAngle( qRadiansToDegrees(angle) );*/
 
-            // qDebug() << "Pos:" << k_pos << "\tRotation" << k_rotation;
+            // qDebug() << "Pos:" << k_pos << " Rotation" << k_rotation;
             QVector<int> proximity;
             // TODO : Understand here what you need
             if(shifted_pos.x() > reachable_distance){
@@ -565,7 +581,7 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             }
 
             proximity_decimal = std::accumulate(proximity.begin(), proximity.end(), 0, [](int x, int y) { return (x << 1) + y; });
-            // qDebug() <<proximity << "\tDec: " << proximity_decimal;
+            // qDebug() <<proximity << " Dec: " << proximity_decimal;
 
 
             if( proximity_decimal!= 0 )
@@ -577,12 +593,14 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
                 // qDebug() << "time:"<<this->time<< " ARK COLLISION MESSAGE to " << k_id << "type " << message.type << "payload " << message.data;
                 lastSent[k_id] = this->time;
                 emit transmitKiloState(message);
+
+                if(test_ARK_msgs)
+                    qDebug() <<QString("%4  kID %1 state is: %2  colour is: %3  msg: %5").arg(k_id).arg(kilo_state_str).arg(kilo_col_str).arg(this->time).arg("COLLIDING");
             }
 
         }
 
-        else if(kilobots_states[k_id] == RANDOM_WALK &&
-               (kilobots_colours[k_id] == Qt::blue || kilobots_colours[k_id] == Qt::red))
+        else if(kilobots_states[k_id] == RANDOM_WALK && this->kilobots_colours[k_id] != WALKING_COLOUR)
         {
             message.id = k_id;
             message.type = RANDOM_WALK;   // sending OUTSIDE
@@ -591,10 +609,10 @@ void mykilobotenvironment::updateVirtualSensor(Kilobot kilobot_entity) {
             // qDebug() << "time:"<<this->time << " ARK EXP MESSAGE to " << k_id << " INSIDE, type " << message.type;
             lastSent[k_id] = this->time;
             emit transmitKiloState(message);
-        }
-//        else
-//            qDebug() << QString("NOT need to send a message to kilobot %1").arg(k_id) << endl;
 
+            if(test_ARK_msgs)
+                qDebug() <<QString("%4  kID %1 state is: %2  colour is: %3  msg: %5").arg(k_id).arg(kilo_state_str).arg(kilo_col_str).arg(this->time).arg("OUTSIDE");
+        }
 
     }
 

@@ -65,6 +65,7 @@ void mykilobotexperiment::receivedSomething(QString msg)
         qDebug() << QString("Received from server: %1").arg(msg) << this->time;
     }
     else{
+        // WARNING : uncomment the following line during the experiments
         qDebug() << QString("Received_from_the_server: %1").arg(msg) << this->time;
     }
     dhtfEnvironment.receive_buffer = msg;
@@ -98,6 +99,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToServer(QString msg)
 {
+    // WARNING : uncomment the following line during the experiments
     qDebug() << QString("Sending__to___the_server: %1").arg(msg) << this->time;
     QByteArray ba = msg.toLocal8Bit();
     const char *c_str2 = ba.data();
@@ -494,20 +496,20 @@ void mykilobotexperiment::run() {
     if(logExp) {
         while(!dhtfEnvironment.completed_areas.isEmpty())
         {
-            Area* completed_area = dhtfEnvironment.completed_areas.takeFirst();
+            Area completed_area = dhtfEnvironment.completed_areas.takeFirst();
 
             log_stream_completed
                     << this->time << '\t'
-                    << completed_area->id << '\t'
-                    << completed_area->creation_time << '\t'
-                    << completed_area->completed_time << '\t'
-                    << int(completed_area->type) << '\t'
-                    << completed_area->kilobots_in_area.size()<< '\t';
+                    << completed_area.id << '\t'
+                    << completed_area.creation_time << '\t'
+                    << completed_area.completed_time << '\t'
+                    << int(completed_area.type) << '\t'
+                    << completed_area.kilobots_in_area.size()<< '\t';
 
-            for(int i=0; i<completed_area->kilobots_in_area.size(); i++)
+            for(int i=0; i<completed_area.kilobots_in_area.size(); i++)
             {
-                log_stream_completed << completed_area->kilobots_in_area.at(i);
-                if(i < completed_area->kilobots_in_area.size() - 1)
+                log_stream_completed << completed_area.kilobots_in_area.at(i);
+                if(i < completed_area.kilobots_in_area.size() - 1)
                 {
                     log_stream_completed <<",";
                 }
@@ -647,8 +649,8 @@ void mykilobotexperiment::plotEnvironment() {
     drawLine(bd3,Qt::yellow, 3,"",false);
 
     // Draw some useful position : center + 4 corners
-    QPoint k_center ((ARENA_CENTER*SCALING)+SHIFTX, (ARENA_CENTER*SCALING)+SHIFTY);
-    drawCircle(QPoint(k_center.x(),k_center.y()), 10.0, QColor(Qt::black), 10, "", false);
+    // QPoint k_center ((ARENA_CENTER*SCALING)+SHIFTX, (ARENA_CENTER*SCALING)+SHIFTY);
+    // drawCircle(QPoint(k_center.x(),k_center.y()), 10.0, QColor(Qt::black), 10, "", false);
 
     // x and y axis
     // std::vector<cv::Point> xAx {Point(SHIFTX, (ARENA_SIZE*SCALING/2.0)+SHIFTY), Point(SHIFTX+(ARENA_SIZE*SCALING), (ARENA_SIZE*SCALING/2.0)+SHIFTY)};

@@ -58,7 +58,7 @@ public:
     QVector<QColor> kilobots_colours;  // list of all kilobots led colours, the led indicate the state of the kilobot
 
     QVector<Area*> areas;   // list of all areas present in the experiment
-    QVector<Area*> completed_areas;
+    QVector<Area> completed_areas;
     QVector<float> lastSent;    // when the last message was sent to the kb at given position
 
 

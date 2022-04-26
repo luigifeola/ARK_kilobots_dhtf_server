@@ -118,7 +118,7 @@ void mykilobotexperiment::smbDisconnectedFromServer()
 
 void mykilobotexperiment::gotNewMesssage(QString msg)
 {
-    qDebug() << "Received from the client: " << msg << " time:" << this->time;
+    qDebug() << "Received_from_the_client: " << msg << " time:" << this->time;
     dhtfEnvironment.receive_buffer = msg;
 
 //    for (QTcpSocket* clientsSocket : server->getClients())
@@ -143,7 +143,7 @@ void mykilobotexperiment::on_pushButton_send_clicked()
 
 void mykilobotexperiment::sendToClient(QString msg)
 {
-    qDebug() << "Sending to client: " << msg << " time:" << this->time;
+    qDebug() << "Sending__to___the_client: " << msg << " time:" << this->time;
     for (QTcpSocket* clientsSocket : server->getClients())
     {
         if (server->sendToClient(clientsSocket, msg) == -1)
@@ -512,20 +512,20 @@ void mykilobotexperiment::run() {
     if(logExp) {
         while(!dhtfEnvironment.completed_areas.isEmpty())
         {
-            Area* completed_area = dhtfEnvironment.completed_areas.takeFirst();
+            Area completed_area = dhtfEnvironment.completed_areas.takeFirst();
 
             log_stream_completed
                        << this->time << '\t'
-                       << completed_area->id << '\t'
-                       << completed_area->creation_time << '\t'
-                       << completed_area->completed_time << '\t'
-                       << int(completed_area->type) << '\t'
-                       << completed_area->kilobots_in_area.size()<< '\t';
+                       << completed_area.id << '\t'
+                       << completed_area.creation_time << '\t'
+                       << completed_area.completed_time << '\t'
+                       << int(completed_area.type) << '\t'
+                       << completed_area.kilobots_in_area.size()<< '\t';
 
-            for(int i=0; i<completed_area->kilobots_in_area.size(); i++)
+            for(int i=0; i<completed_area.kilobots_in_area.size(); i++)
             {
-                log_stream_completed << completed_area->kilobots_in_area.at(i);
-                if(i < completed_area->kilobots_in_area.size() - 1)
+                log_stream_completed << completed_area.kilobots_in_area.at(i);
+                if(i < completed_area.kilobots_in_area.size() - 1)
                 {
                     log_stream_completed <<",";
                 }

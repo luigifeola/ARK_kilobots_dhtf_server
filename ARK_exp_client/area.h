@@ -38,7 +38,6 @@ public:
     QColor color; /* Color used to represent the area */
     QVector<uint> kilobots_in_area; /* keep counts of how many kbs are in the area*/
     bool completed;  /* Flag to understand if the task is accomplished or not */
-    bool party_message_sent; /* Flag to check if kilobots_in_area received the area completion message */
     double respawn_timer; /* Time needed to the area to respawn */
     double creation_time; /* Time at which the area is created/respawned */
     double completed_time; /* Time at which the area is completed */
@@ -53,7 +52,6 @@ public:
     {
         this->creation_time = 0.0;
         this->completed = false;
-        this->party_message_sent = false;
         this->kilobots_in_area.clear();
 
         this->respawn_timer = 40;
@@ -102,18 +100,14 @@ public:
     }
 
     // check if on top of the area there are the right amount of kilobots, so remove the area from the completable task
-    bool isCompleted(double kTime, int ready)
+    bool isCompleted(int ready)
     {
         if(ready)
         {
-            if( (this->type == HARD_TASK && kilobots_in_area.size() >= HARD_TASK_COMPLETED) ||
-                (this->type == SOFT_TASK && kilobots_in_area.size() >= SOFT_TASK_COMPLETED))
-            {
-                this->completed_time = kTime;
-                this->completed = true;
-            }
+            return( (this->type == HARD_TASK && kilobots_in_area.size() >= HARD_TASK_COMPLETED) ||
+                (this->type == SOFT_TASK && kilobots_in_area.size() >= SOFT_TASK_COMPLETED));
         }
-        return this->completed;
+        return false;
     }
 
     void set_completed(double kTime)
@@ -128,7 +122,6 @@ public:
         if(kTime - this->completed_time > this->respawn_timer)
         {
             this->completed = false;
-            this->party_message_sent = false;
             this->kilobots_in_area.clear();
             this->creation_time = kTime;
             this->completed_time = 0.0;
@@ -141,7 +134,6 @@ public:
     void received_Respawn(double kTime)
     {
         this->completed = false;
-        this->party_message_sent = false;
         this->kilobots_in_area.clear();
         this->creation_time = kTime;
         this->completed_time = 0.0;

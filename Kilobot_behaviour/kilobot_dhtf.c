@@ -264,10 +264,10 @@ void rx_message(message_t *msg, distance_measurement_t *d)
       switch (current_state)
       {
       case RANDOM_WALKING:
-        set_color(RGB(0, 0, 0));
+        set_color(RGB(0, 0, 3));
         break;
       case WAITING:
-        set_color(RGB(0, 0, 3));
+        set_color(RGB(0, 0, 0));
         break;
       case LEAVING:
         set_color(RGB(3, 0, 0));
@@ -447,7 +447,7 @@ void finite_state_machine()
 
       last_waiting_ticks = kilo_ticks;
 
-      set_color(RGB(0, 0, 3));
+      set_color(RGB(0, 0, 0));
       current_state = WAITING;
     }
     break;
@@ -460,7 +460,7 @@ void finite_state_machine()
 
       internal_timeout = 0;
       current_state = RANDOM_WALKING;
-      set_color(RGB(0, 0, 0));
+      set_color(RGB(0, 0, 3));
     }
     /* Timeout condition */
     if (kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
@@ -479,7 +479,7 @@ void finite_state_machine()
     if (location == OUTSIDE)
     {
       current_state = RANDOM_WALKING;
-      set_color(RGB(0, 0, 0));
+      set_color(RGB(0, 0, 3));
     }
     break;
   }
@@ -493,7 +493,7 @@ void finite_state_machine()
     if (kilo_ticks > party_ticks + 10 * to_sec)
     {
       set_motion(FORWARD);
-      set_color(RGB(0, 0, 0));
+      set_color(RGB(0, 0, 3));
       current_state = RANDOM_WALKING;
     }
     break;
@@ -514,6 +514,7 @@ void loop()
   {
     /* Initialise motion variables */
     last_motion_ticks = rand() % max_straight_ticks;
+    set_color(RGB(0, 0, 3));
     set_motion(FORWARD);
     start = 2;
   }
