@@ -60,13 +60,13 @@ uint16_t backup_state = RANDOM_WALKING;
 motion_t backup_motion = STOP;
 
 /***********WALK PARAMETERS***********/
-adaptive_walk current_walk = CONSTANT;  // start with a meaningless value
-const float std_motion_steps = 20 * 16; // variance of the gaussian used to compute forward motion
-float levy_exponent = 1.4;              // 2 is brownian like motion (alpha)
-float crw_exponent = 0.9;               // higher more straight (rho)
-uint32_t turning_ticks = 0;             // keep count of ticks of turning
-const uint8_t max_turning_ticks = 80;   /* constant to allow a maximum rotation of 180 degrees with \omega=\pi/5 */
-unsigned int straight_ticks = 0;        // keep count of ticks of going straight
+adaptive_walk current_walk = CONSTANT; //start with a meaningless value
+const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
+float levy_exponent = 1.4;             // 2 is brownian like motion (alpha)
+float crw_exponent = 0.9;              // higher more straight (rho)
+uint32_t turning_ticks = 0;            // keep count of ticks of turning
+const uint8_t max_turning_ticks = 120; /* constant to allow a maximum rotation of 180 degrees with \omega=\pi/5 */
+unsigned int straight_ticks = 0;       // keep count of ticks of going straight
 const uint16_t max_straight_ticks = 320;
 uint32_t last_motion_ticks = 0;
 
@@ -81,7 +81,7 @@ Free_space free_space = LEFT;
 bool wall_avoidance_start = false;
 
 /* ---------------------------------------------- */
-// Variables for Smart Arena messages
+//Variables for Smart Arena messages
 int sa_type = 0;
 int sa_payload = 0;
 
@@ -89,11 +89,13 @@ int sa_payload = 0;
 uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : not received, 1 : received, 2 : not need anymore to receive
 #endif
 int location = 0;
-int internal_timeout = 0; // Internal counter for task complention wait
-int turn_timer;           // Avoid the robot to get stuck in Leagving
+int internal_timeout = 0; //Internal counter for task complention wait
+int turn_timer;           //Avoid the robot to get stuck in Leagving
 
 /* PARAMETER: change this value to determine timeout length */
-const int TIMEOUT_CONST = 1;
+const int TIMEOUT_CONST = 10; /*10;*/
+int vIncrement = 0;
+int adaptiveTimeout = 0;
 const uint32_t to_sec = 32;
 uint32_t last_waiting_ticks = 0;
 
@@ -169,8 +171,15 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     location = sa_type;
     if (internal_timeout == 0)
     {
-      internal_timeout = sa_payload * TIMEOUT_CONST * 10;
-      // printf("kID=%d, Internal timeout=%d\n", kilo_uid, internal_timeout);
+      current_walk = (sa_payload >> 8) & 0x03;
+      adaptiveTimeout = (sa_payload >> 7) & 0x01;
+      internal_timeout = ((sa_payload & 0X7F) * TIMEOUT_CONST);
+      if (adaptiveTimeout == 1)
+      {
+        internal_timeout += vIncrement;
+      }
+      // printf("kID=%d, Internal timeout=%d\t adaptiveTimeout=%d\t increment=%d\n", kilo_uid, internal_timeout, adaptiveTimeout, vIncrement);
+      // printf("kID=%d, adaptive walk=%d\n", kilo_uid, (int)current_walk);
     }
     break;
 
@@ -260,7 +269,7 @@ void rx_message(message_t *msg, distance_measurement_t *d)
     else
     { // runtime identification ended
       kilo_ticks = backup_kiloticks;
-      // set_color(current_LED_color);
+      //set_color(current_LED_color);
       runtime_identification = false;
       set_motion(backup_motion);
       current_state = backup_state;
@@ -293,6 +302,21 @@ void rx_message(message_t *msg, distance_measurement_t *d)
 
 void random_walk()
 {
+  switch (current_walk)
+  {
+  case PERSISTENT:
+    crw_exponent = 0.9;
+    levy_exponent = 1.4;
+    // printf("kID=%d, PERSISTENT\n", kilo_uid);
+    break;
+  case BROWNIAN:
+    crw_exponent = 0.0;
+    levy_exponent = 2.0;
+    // printf("kID=%d, BROWNIAN\n", kilo_uid);
+    break;
+  default:
+    break;
+  }
   switch (current_motion_type)
   {
   case TURN_LEFT:
@@ -428,7 +452,7 @@ void wall_avoidance_procedure(uint8_t sensor_readings)
       // {
       //   set_motion(TURN_RIGHT);
       // }
-      // rotate towards the last free space kept in memory
+      //rotate towards the last free space kept in memory
       set_motion(free_space);
     }
     if (kilo_ticks > last_motion_ticks + turning_ticks)
@@ -469,19 +493,27 @@ void finite_state_machine()
     /* Completion condition */
     if (location == OUTSIDE)
     {
-      set_motion(FORWARD);
-      internal_timeout = 0;
       current_state = RANDOM_WALKING;
+      set_motion(FORWARD);
+
+      if (internal_timeout + vIncrement > 10)
+      {
+        vIncrement -= 10;
+      }
+      internal_timeout = 0;
       // printf("kID=%d, area completed, increment=%d\n\n", kilo_uid, vIncrement);
       set_color(RGB(0, 0, 0));
     }
 
     /* Timeout condition */
-    if (kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
+    else if (kilo_ticks > last_waiting_ticks + internal_timeout * to_sec)
     {
-      internal_timeout = 0;
-      set_motion(FORWARD);
       current_state = LEAVING;
+      set_motion(FORWARD);
+
+      internal_timeout = 0;
+      vIncrement += 10;
+      // printf("kID=%d, elapsed timeout, increment=%d\n\n", kilo_uid, vIncrement);
       set_color(RGB(3, 0, 0));
     }
     break;
@@ -505,8 +537,8 @@ void finite_state_machine()
     if (kilo_ticks > party_ticks + 10 * to_sec)
     {
       set_motion(FORWARD);
-      set_color(RGB(0, 0, 0));
       current_state = RANDOM_WALKING;
+      set_color(RGB(0, 0, 0));
     }
     break;
   }

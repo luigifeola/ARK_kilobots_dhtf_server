@@ -53,13 +53,10 @@ namespace argos
 #include <argos3/plugins/robots/kilobot/simulator/kilobot_communication_medium.h>
 #include <argos3/plugins/robots/kilobot/simulator/kilobot_communication_default_actuator.h>
 
-// kilobot messaging
+//kilobot messaging
 #include <argos3/plugins/robots/kilobot/control_interface/kilolib.h>
 #include <argos3/plugins/robots/kilobot/control_interface/message_crc.h>
 #include <argos3/plugins/robots/kilobot/control_interface/message.h>
-
-#include <array>
-#include "area.h"
 
 using namespace argos;
 
@@ -75,9 +72,17 @@ public:
 
     virtual void Reset();
 
-    virtual void Destroy();
-
     virtual void PostStep();
+
+    virtual void PostExperiment();
+
+    /** Log area pos, type, state (completed or not) */
+    void AreaLOG();
+
+    /** Log Kilobot pose and state */
+    void KiloLOG();
+
+    virtual void Destroy();
 
     /** Setup the initial state of the Kilobots in the space */
     void SetupInitialKilobotStates();
@@ -96,6 +101,9 @@ public:
     /** Init environment*/
     void Initialise_environment();
 
+    /** Init environment with 4 regions: RR,RB,BR,BB*/
+    void Initialise_environment_4_regions();
+
     /** Get the message to send to a Kilobot according to its position */
     void UpdateKilobotState(CKilobotEntity &c_kilobot_entity);
 
@@ -111,15 +119,6 @@ public:
     /** Simulate proximity sensor*/
     std::vector<int> Proximity_sensor(CVector2 obstacle_direction, Real kOrientation, int num_sectors);
 
-    /* Log completed areas */
-    void CompletedAreasLOG();
-
-    /** Log area pos, type, state (completed or not) */
-    void AreaLOG();
-
-    /** Log Kilobot pose and state */
-    void KiloLOG();
-
     /** Setup socket*/
     void Initialise_socket();
 
@@ -127,15 +126,27 @@ private:
     /************************************/
     /*  Virtual Environment variables   */
     /************************************/
-
-    std::vector<Area *> multiArea;
-    std::vector<Area> completed_areas;
-
-    typedef enum // kilobot state
+    /* virtual environment struct*/
+    struct SVirtualArea //parameters of the circular areas
     {
-        OUTSIDE_AREAS = 0, // looking for a task
-        INSIDE_AREA = 1,   // participating a task
-        LEAVING = 2,       // elapsed timeout -> leaving the task
+#ifdef DEBUGGING
+        Real creationTime = 0.0;
+        Real completitionTime = 0.0;
+#endif
+        int id;
+        CVector2 Center;
+        Real Radius;
+        CColor Color;
+        int contained;
+        bool Completed; //set to "true" after the task is completed
+    };
+    std::vector<SVirtualArea> multiArea;
+
+    typedef enum //states of the kilobots
+    {
+        OUTSIDE_AREAS = 0,
+        INSIDE_AREA = 1,
+        LEAVING = 2,
     } SRobotState;
 
     typedef enum
@@ -144,50 +155,64 @@ private:
         kRED = 1,
     } colour;
 
-    struct FloorColorData // contains components of area color
+    struct WaitingTimes
+    {
+        int BB = 1;
+        int BR = 2;
+        int RB = 3;
+        int RR = 5;
+    } waiting_times;
+
+    struct FloorColorData //contains components of area color
     {
         UInt8 R;
         UInt8 G;
         UInt8 B;
     };
 
-    std::string mode;                          // can be SERVER or CLIENT
-    std::string IP_ADDR;                       // ip address where to connect
-    bool augmented_knowledge;                  // TRUE: ARK knows the color of areas on the other arena; FALSE: ARK knows color of its own areas only; timeout constant are set consequently
-    UInt32 random_seed;                        // to reproduce same random tests
-    int desired_num_of_areas;                  // number of exploitable areas for the experiment (max 16-4=12 (removing the 4 corners))
-    UInt8 hard_tasks;                          // the number of red areas (the ones that require more robots)
-    std::vector<int> activated_areas;          // IDs of active areas
-    std::vector<int> hard_tasks_vec;           // IDs of hard tasks for the server
-    std::vector<int> hard_tasks_client_vec;    // IDs of hard tasks for the client
-    int vSoftRequiredKilobots;                 // # robots to complete soft tasks
-    int vHardRequiredKilobots;                 // # robots to complete hard tasks
-    bool mixed;                                // if mixed, we will have only red-blue or blue-red areas
-    bool IsNotZero(int i) { return (i != 0); } // to count how non 0 emelent there are in sending/receiving buffer
+    std::string mode;                          //can be SERVER or CLIENT
+    std::string IP_ADDR;                       //ip address where to connect
+    bool augmented_knowledge;                  //TRUE: ARK knows the color of areas on the other arena; FALSE: ARK knows color of its own areas only; timeout constant are set consequently
+    bool stand_alone_mode;                     //TRUE: runs only the server, generating fake client messages
+    UInt32 random_seed;                        //to reproduce same random tests
+    UInt8 desired_num_of_areas;                //number of exploitable areas for the experiment (max 16-4=12 (removing the 4 corners))
+    UInt8 hard_tasks;                          //the number of red areas (the ones that require more robots)
+    std::vector<int> activated_areas;          //IDs of active areas
+    std::vector<int> hard_tasks_vec;           //IDs of hard tasks for the server
+    std::vector<int> hard_tasks_client_vec;    //IDs of hard tasks for the client
+    bool mixed;                                //if mixed, we will have only red-blue or blue-red areas
+    bool adaptive_walk;                        //if true, trying to complete more RED tasks as possible (completed RED task -> brownian motion, BLUE task -> persistent motion)
+    bool fourRegions;                          //if true, the combination of client and server arenas give rise to 4 regions: RR,RB,BR,BB
+    std::vector<int> otherColor;               //Color of the areas on the other ARK
+    bool IsNotZero(int i) { return (i != 0); } //to count how non 0 emelent there are in sending/receiving buffer
     char inputBuffer[30];                      // array containing the message received from the socket e.g.
     std::string initialise_buffer;             // buffer containing setup values (active and type of the task)
-    std::string outputBuffer;                  // array  containing the message to send
-    char storeBuffer[30];                      // array where to store input message to keep it available
-    int bytesReceived;                         // length of received string
-    int serverSocket;                          // socket variable
-    int clientSocket;                          // socket variable
-    std::vector<double> vCompletedTime;        // vector with completition time
-                                               //  #endif
+    std::string outputBuffer;                  //array  containing the message to send
+    char storeBuffer[30];                      //array where to store input message to keep it available
+    int bytesReceived;                         //length of received string
+    int serverSocket;                          //socket variable
+    int clientSocket;                          //socket variable
+    UInt8 num_of_areas;                        //initial number of clustering areas i.e. 16, will be reduced to desired_num_of_areas
+    double kTimerMultiplier;                   //multiplicative constant for the timeout study
+    double kRespawnTimer;                      //when completed, timer starts and when it will expire the area is reactivated
+                                               // #ifndef DEBUG
+    std::vector<double> vCompletedTime;        //vector with completition time
+                                               // #endif
     bool initialised;                          // true when client ACK the initial setup
+
+    /*vectors as long as the number of kilobots*/
+    std::vector<UInt8> request; //vector that determines waiting time: 1 for kilobots on blue areas and 3 for the ones on red areas (multiplied times 500 gives the number of cycles before timeout)
+    std::vector<SInt8> whereis; // says in which area the KB is: -1 if walking, (index of area) if inside an area
+
+    std::vector<Real> m_vecLastTimeMessaged;
+    Real m_fMinTimeBetweenTwoMsg;
 
     /************************************/
     /*       Experiment variables       */
     /************************************/
 
-    /* random number generator */
-    CRandom::CRNG *c_rng;
-
-    std::vector<Real> m_vecLastTimeMessaged;
-    Real m_fMinTimeBetweenTwoMsg;
-
     /*Kilobots properties*/
     std::vector<CVector2> m_vecKilobotsPositions;
-    std::vector<UInt8> m_vecKilobotsTimer; // vector that determines waiting time for kilobots
     std::vector<argos::CColor> m_vecKilobotsColours;
     std::vector<CRadians> m_vecKilobotsOrientations;
     std::vector<SRobotState> m_vecKilobotStates_ALF;
