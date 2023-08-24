@@ -6,7 +6,8 @@ This repository contains the **Multi Augmented Reality for Kilobots (M-ARK)** so
 # Operating multiple physical ARK systems
 
 ## ARK installation
-Here we should guidance on how to get ARK working on each computer
+
+Download the [ARK](https://github.com/DiODeProject/KilobotArena) source code and follow the provided installation instructions.
 
 ## Starting an ARK node
 Here we should guide the user on how to start an ARK node
