@@ -3,18 +3,17 @@
 This repository contains the **Multi Augmented Reality for Kilobots (M-ARK)** software. If you use this software please cite the following research article:
 **XXXXXX** 
 
-# Operating multiple physical ARK systems
-
+# Using a standalone ARK system 
 ## ARK installation
-
 Download the [ARK](https://github.com/DiODeProject/KilobotArena) source code and follow the provided installation instructions.
 
-## Using a standalone ARK system 
+## Getting started with ARK 
 Follow the [Getting started with ARK](https://diode.group.shef.ac.uk/kilobots/index.php/Getting_started_on_ARK) instructions.
 
-## Setting up an ARK node as a server
+# Operating multiple physical ARK systems
 
-We should explain how can we set an ARK node to act as a server.
+## Setting up an ARK node as a server
+- To run an ARK node as a server you should use the server ARK's experiment provided in the ARK_exp_server within this repository. This should be opened and compiled using Qtcreator IDE and then used as any other ARK experiment.
 
 ## Setting up an ARK node as a client
 
