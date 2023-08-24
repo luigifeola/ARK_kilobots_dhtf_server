@@ -14,7 +14,7 @@ Follow the [Getting started with ARK](https://diode.group.shef.ac.uk/kilobots/in
 
 ## Setting up an ARK node as a server
 
-- To run an ARK node as a server you should use the server ARK's experiment provided in the ARK_exp_server within this repository. This should be opened and compiled using Qtcreator IDE and then used as any other ARK experiment.
+- To run an ARK node as a server you should use the ARK's server experiment provided in the ARK_exp_server folder within this repository. This should be opened and compiled using Qtcreator IDE and then used as any other ARK experiment.
 
 - Speak about the connection part.
   
