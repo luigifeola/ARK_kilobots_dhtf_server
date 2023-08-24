@@ -16,7 +16,9 @@ Follow the [Getting Started with ARK](https://diode.group.shef.ac.uk/kilobots/in
 
 - To run an ARK node as a server you should use the ARK's server experiment code base provided in the ARK_exp_server folder within this repository.
 - This experiment code base should be opened and compiled using Qtcreator IDE and then used as any other ARK experiment (see the getting started section above).
-- The server node user must note the IP address of their machine to share it with the client user. They must also ensure that the right firewall permissions are enabled to allow the client to communicate with the server.
+- The server node's user must note the IP address of their machine and share it with the client's user. They must also ensure that firewall permissions are in place to allow the client to communicate with the server.
+- To start the server, the server node's user must press the "Start Server" button on the ARK's user interface.
+- To test that the communication is established between the server and the client, the server's user can write a string in the provided field on the user interface and press "Sent to client". If the communication is working, the client's use should receive the string sent by the server's user.
   
 ## Setting up an ARK node as a client
 
