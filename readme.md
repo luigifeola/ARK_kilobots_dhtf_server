@@ -1,6 +1,6 @@
 # Welcome to M-ARK repo!
 
-This repository contains the **Multi Augmented Reality for Kilobots (M-ARK) ** software. If you use this software please cite the following research article:
+This repository contains the **Multi Augmented Reality for Kilobots (M-ARK)** software. If you use this software please cite the following research article:
 **XXXXXX** 
 
 # Operating multiple physical ARK systems
