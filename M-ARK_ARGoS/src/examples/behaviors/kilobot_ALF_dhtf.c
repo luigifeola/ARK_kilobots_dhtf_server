@@ -6,7 +6,7 @@
 
 #define COLLISION_BITS 8
 #define SECTORS_IN_COLLISION 2
-#define ARGOS_SIMULATION
+#define ARGOS_SIMULATION // COMMENT THIS LINE IF YOU ARE USING ARK
 
 typedef enum
 { // Enum for different motion types
