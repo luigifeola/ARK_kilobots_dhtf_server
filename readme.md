@@ -1,8 +1,9 @@
 # Welcome to M-ARK repo!
 
 This repository contains the **Multi Augmented Reality for Kilobots (M-ARK)** software. If you use this software please cite the following research article:
-**XXXXXX** 
-
+```shell
+Luigi Feola, Andreagiovanni Reina, Mohamed S. Talamali, Vito Trianni, "Multi-Swarm Interaction through Augmented Reality for Kilobots," IEEE Robotics and Automation Letters, (in press), 2023.
+```
 # Using a standalone ARK system 
 ## ARK installation
 Download the [ARK](https://github.com/DiODeProject/KilobotArena) source code and follow the provided installation instructions.
