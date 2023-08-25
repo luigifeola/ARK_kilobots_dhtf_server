@@ -17,20 +17,20 @@ The following describes the procedure to execute the DHTF experiment, presented 
 ## Setting up an ARK node as a server
 
 - To run an ARK node as a server you should use the ARK's server experiment code base provided in the ARK_exp_server folder within this repository.
-- This experiment code base should be opened and compiled using Qtcreator IDE and then used as any other ARK experiment (see the getting started section above).
+- Open the .pro file inside the folder using Qtcreator IDE and then click build to obtain a compiled experiment file that can be used as any other ARK experiment (see the getting started section above).
 - The server node's user must note the IP address of their machine and share it with the client's user. They must also ensure that firewall permissions are in place to allow the client to communicate with the server.
 - To start the server, the server node's user must press the "Start Server" button on the ARK's user interface.
-- To test that the communication is established between the server and the client, the server's user can write a string in the provided field on the user interface and press "Sent to client". If the communication is working, the client's use should receive the string sent by the server's user.
+- To test that the communication is established between the server and the client, the server's user can write a string in the provided field on the user interface and press "Sent to client". If the communication is working, the client's user should receive the string sent by the server's user.
   
 ## Setting up an ARK node as a client
 
 - To run an ARK node as a server you should use the ARK's client experiment code base provided in the ARK_exp_client folder within this repository.
-- This experiment code base should be opened and compiled using Qtcreator IDE and then used as any other ARK experiment (see the getting started section above).
-- The client node's user must know the IP address of the server machine.
+- Open the .pro file inside the folder using Qtcreator IDE and then click build to obtain a compiled experiment file that can be used as any other ARK experiment (see the getting started section above).
+- The client node's user must know the IP address of the server's machine.
 - To connect to the server, the client node's user must select or manually insert the IP address of the server machine and press the "Connect to Server" button on the ARK's user interface.
 
 ## Kilobot behaviour
-The code to be uploaded to the Kilobot is the same for both the experiments. Upload the `kilobot_ALF_dhtf.c` behaviour located at `M-ARK_ARGOS/src/examples/behaviors/kilobot_ALF_dhtf.c`. Be careful that line 9 of that file is **commented**.  
+The code to be uploaded to the Kilobot is the same for both experiments. Upload the `kilobot_ALF_dhtf.c` behaviour located at `M-ARK_ARGOS/src/examples/behaviors/kilobot_ALF_dhtf.c`. Line 9 of this file must remain **commented** when using real Kilobots and **uncommented** when using simulated Kilobots under ARGoS.
 
 # Operating simulated ARK systems
 
